@@ -5,6 +5,8 @@ import configparser
 from fractions import Fraction
 from time import sleep
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers import interval
+
 import lib.image_utils as image_utils
 from lib.image_utils import LOGGER
 import lib.utils as utils
@@ -206,12 +208,12 @@ class Wallhaven:
         self.save_config()
         if self.schedule_time != 0:
             if self.timer is None:
-                self.timer = BackgroundScheduler(timezone='Asia/Shanghai')
+                self.timer = BackgroundScheduler(timezone="Asia/Shanghai")
             else:
                 self.timer.remove_job('schedule_change')
             # 采用非阻塞的方式
-            self.timer.add_job(lambda: self.next_bg(), 'interval',
-                               seconds=self.schedule_time, id='schedule_change')
+            trigger = interval.IntervalTrigger(seconds=self.schedule_time,timezone="Asia/Shanghai")
+            self.timer.add_job(lambda: self.next_bg(), trigger=trigger, id='schedule_change', replace_existing=True)
             if self.timer.state == 0:
                 self.timer.start()
         else:
