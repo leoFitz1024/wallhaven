@@ -36,6 +36,33 @@ def set_wall_paper(pic, bg_color, model):
     win32gui.SystemParametersInfo(win32con.SPI_SETDESKWALLPAPER, pic, win32con.SPIF_SENDWININICHANGE)
 
 
+def set_auto_run(path, operate):
+    name = 'wallhaven'  # 要添加的项值名称
+    # path = 'D:\\python_work\\work\dist\\translate.exe'  # 要添加的exe路径
+    # 注册表项名
+    KeyName = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    reg_flags = win32con.WRITE_OWNER | win32con.KEY_WOW64_64KEY | win32con.KEY_ALL_ACCESS
+    if operate == 1:
+        # 添加
+        # 异常处理
+        try:
+            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, KeyName, 0, reg_flags)
+            win32api.RegSetValueEx(key, name, 0, win32con.REG_SZ, path)
+            win32api.RegCloseKey(key)
+        except:
+            print('添加失败')
+        print('添加成功！')
+    else:
+        # 移除
+        try:
+            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, KeyName, 0, reg_flags)
+            win32api.RegDeleteValue(key, name)
+            win32api.RegCloseKey(key)
+        except:
+            print('Value 不存在')
+
+
+
 def get_dominant_colors(in_file):
     fd = open(in_file, 'rb')
     try:

@@ -9,7 +9,7 @@ import requests
 
 from lib.LogUtil import LogUtil, LOG_MODEL
 
-LOGGER = LogUtil(LOG_MODEL.file)
+LOGGER = LogUtil(LOG_MODEL.console)
 
 img_url_template = "https://w.wallhaven.cc/full/{0}/wallhaven-{1}.jpg"
 

@@ -683,9 +683,9 @@ QComboBox::down-arrow {
         <property name="geometry">
          <rect>
           <x>9</x>
-          <y>9</y>
+          <y>41</y>
           <width>351</width>
-          <height>101</height>
+          <height>91</height>
          </rect>
         </property>
         <property name="font">
@@ -806,9 +806,9 @@ QComboBox::down-arrow {
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>120</y>
+          <y>140</y>
           <width>351</width>
-          <height>111</height>
+          <height>101</height>
          </rect>
         </property>
         <property name="font">
@@ -1013,6 +1013,25 @@ QPushButton:pressed
           </layout>
          </item>
         </layout>
+       </widget>
+       <widget class="QCheckBox" name="autoRun">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>91</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>楷体</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>开机自启</string>
+        </property>
        </widget>
       </widget>
      </widget>

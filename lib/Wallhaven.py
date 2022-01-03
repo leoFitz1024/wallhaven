@@ -15,6 +15,8 @@ from lib.Downloader import Downloader
 
 CONFIG_PATH = f'{os.getcwd()}/config.ini'
 
+EXE_PATH = f'{os.getcwd()}\out\TrayIcon.dist\TrayIcon.exe'
+
 FULL_FILE_TPL = "full_{0}"
 
 GRAY_COLOR = [(8, 8, 8), (8, 7, 8), (76, 74, 72), (81, 92, 107), (181, 152, 161), (50, 47, 59), (62, 56, 65),
@@ -68,11 +70,12 @@ class Wallhaven:
         self.images_ids = []
         self.dislike_ids = set([])
         # config
+        self.auto_run = 0
         self.images_dir = DEFAULT_PATH
         self.max_page = 100
         # url config
-        self.categories = 0b111
         self.purity = 0b110
+        self.categories = 0b111
         self.top_range = 3
         self.sorting = "Random"
         self.ratios_list = set(["16x9"])
@@ -99,6 +102,8 @@ class Wallhaven:
                 if self.config.has_option("cache", "total_page"):
                     self.total_page = int(self.config.get("cache", "total_page"))
             if self.config.has_section("config"):
+                if self.config.has_option("config", "auto_run"):
+                    self.auto_run = int(self.config.get("config", "auto_run"))
                 if self.config.has_option("config", "ratios"):
                     self.ratios_list = set(json.loads(self.config.get("config", "ratios")))
                 if self.config.has_option("config", "max_page"):
@@ -145,6 +150,7 @@ class Wallhaven:
         self.config.set("cache", "bg_index", str(self.current_bg_index))
         self.config.set("cache", "current_page", str(self.current_page))
         self.config.set("cache", "total_page", str(self.total_page))
+        self.config.set("config", "auto_run", str(self.auto_run))
         self.config.set("config", "ratios", "[%s]" % ", ".join(map(lambda e: '"%s"' % e, self.ratios_list)))
         self.config.set("config", "max_page", str(self.max_page))
         self.config.set("config", "schedule_time", str(self.schedule_time))
@@ -204,6 +210,10 @@ class Wallhaven:
                 return self.download_current_bg()
         return img_id
 
+    def do_change_auto_run(self):
+        print(self.auto_run)
+        win_function.set_auto_run(EXE_PATH, self.auto_run)
+
     def do_schedule_time(self):
         self.save_config()
         if self.schedule_time != 0:
@@ -212,7 +222,7 @@ class Wallhaven:
             else:
                 self.timer.remove_job('schedule_change')
             # 采用非阻塞的方式
-            trigger = interval.IntervalTrigger(seconds=self.schedule_time,timezone="Asia/Shanghai")
+            trigger = interval.IntervalTrigger(seconds=self.schedule_time, timezone="Asia/Shanghai")
             self.timer.add_job(lambda: self.next_bg(), trigger=trigger, id='schedule_change', replace_existing=True)
             if self.timer.state == 0:
                 self.timer.start()

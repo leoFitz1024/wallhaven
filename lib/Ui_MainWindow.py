@@ -19,6 +19,16 @@ class Ui_MainWindow(QMainWindow):
         self.ratios_item_map = {}
         self.time_item_map = {}
         self.mainExe = mainExe
+        # temp config
+        self.temp_auto_run = 0
+        self.config_is_changed = False
+        self.temp_purity = 0b110
+        self.temp_categories = 0b111
+        self.temp_top_range = 3
+        self.temp_sorting = "Random"
+        self.temp_ratios_list = set([])
+        self.temp_schedule_time = 0
+        self.temp_images_dir = None
 
     def init_Ui(self):
         self.setObjectName("MainWindow")
@@ -383,7 +393,7 @@ class Ui_MainWindow(QMainWindow):
         self.sys_set_tab = QtWidgets.QWidget()
         self.sys_set_tab.setObjectName("sys_set_tab")
         self.groupBox = QtWidgets.QGroupBox(self.sys_set_tab)
-        self.groupBox.setGeometry(QtCore.QRect(9, 9, 351, 101))
+        self.groupBox.setGeometry(QtCore.QRect(9, 41, 351, 91))
         font = QtGui.QFont()
         font.setFamily("楷体")
         font.setPointSize(12)
@@ -442,7 +452,7 @@ class Ui_MainWindow(QMainWindow):
         self.time_5h.setObjectName("time_5h")
         self.gridLayout_3.addWidget(self.time_5h, 1, 2, 1, 1)
         self.groupBox_2 = QtWidgets.QGroupBox(self.sys_set_tab)
-        self.groupBox_2.setGeometry(QtCore.QRect(10, 120, 351, 111))
+        self.groupBox_2.setGeometry(QtCore.QRect(10, 140, 351, 101))
         font = QtGui.QFont()
         font.setFamily("楷体")
         font.setPointSize(12)
@@ -560,6 +570,13 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         self.tabWidget.addTab(self.sys_set_tab, "")
         self.verticalLayout_2.addWidget(self.tabWidget)
+        self.autoRun = QtWidgets.QCheckBox(self.sys_set_tab)
+        self.autoRun.setGeometry(QtCore.QRect(10, 10, 91, 16))
+        font = QtGui.QFont()
+        font.setFamily("楷体")
+        font.setPointSize(12)
+        self.autoRun.setFont(font)
+        self.autoRun.setObjectName("autoRun")
         self.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(self)
@@ -622,6 +639,8 @@ class Ui_MainWindow(QMainWindow):
         self.err_path_tip.setText(_translate("MainWindow", "配置文件中路径不合法，已使用默认路径。"))
         self.open_dir_btn.setText(_translate("MainWindow", "打开路径"))
         self.change_dir_btn.setText(_translate("MainWindow", "更改"))
+        self.autoRun.setText(_translate("MainWindow", "开机自启"))
+        self.autoRun.hide()
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.sys_set_tab), _translate("MainWindow", "系统设置"))
         self.load_Controls()
         self.bindEvent()
@@ -671,6 +690,7 @@ class Ui_MainWindow(QMainWindow):
         self.open_dir_btn.clicked.connect(self.open_img_dir)
         self.change_dir_btn.clicked.connect(self.change_img_dir)
         self.top_range_box.currentIndexChanged.connect(self.change_top_range)
+        # self.autoRun.stateChanged.connect(self.change_auto_run)
 
         for purity_item in self.purity_item_map.values():
             purity_item.stateChanged.connect(self.change_purity)
@@ -718,6 +738,10 @@ class Ui_MainWindow(QMainWindow):
         for ratio in self.mainExe.ratios_list:
             self.ratios_item_map[ratio].setChecked(True)
 
+        # load auto run
+        if self.mainExe.auto_run == 1:
+            self.autoRun.setChecked(True)
+
         # load time
         if self.mainExe.schedule_time == 0:
             self.time_close.setChecked(True)
@@ -733,6 +757,7 @@ class Ui_MainWindow(QMainWindow):
             self.time_5h.setChecked(True)
 
         # load img_dir
+        self.temp_images_dir = self.mainExe.images_dir
         fontMetrics = QFontMetrics(self.img_path.font())
         if fontMetrics.width(self.mainExe.images_dir) > 277:
             strDes = QFontMetrics(self.img_path.font()).elidedText(self.mainExe.images_dir, Qt.ElideMiddle,
@@ -747,14 +772,14 @@ class Ui_MainWindow(QMainWindow):
         images_dir = QtWidgets.QFileDialog.getExistingDirectory(None, "选择文件夹",
                                                                 self.mainExe.images_dir)  # 起始路径
         if images_dir != "":
-            self.mainExe.images_dir = images_dir
+            self.temp_images_dir = images_dir
             fontMetrics = QFontMetrics(self.img_path.font())
-            if fontMetrics.width(self.mainExe.images_dir) > 277:
-                strDes = QFontMetrics(self.img_path.font()).elidedText(self.mainExe.images_dir, Qt.ElideMiddle,
+            if fontMetrics.width(self.temp_images_dir) > 277:
+                strDes = QFontMetrics(self.img_path.font()).elidedText(self.temp_images_dir, Qt.ElideMiddle,
                                                                        275)
                 self.img_path.setText(strDes)
             else:
-                self.img_path.setText(self.mainExe.images_dir)
+                self.img_path.setText(self.temp_images_dir)
 
     def open_img_dir(self):
         self.hide_err_path_tips()
@@ -770,7 +795,7 @@ class Ui_MainWindow(QMainWindow):
 
     def change_top_range(self):
         """修改排序时间范围"""
-        self.mainExe.top_range = self.top_range_box.currentIndex()
+        self.temp_top_range = self.top_range_box.currentIndex()
 
     def change_purity(self):
         """修改内容筛选触发"""
@@ -783,11 +808,11 @@ class Ui_MainWindow(QMainWindow):
         else:
             n = 0
         if isChecked:
-            self.mainExe.purity |= (1 << n)
+            self.temp_purity |= (1 << n)
         else:
-            self.mainExe.purity &= ~(1 << n)
-        if self.mainExe.purity == 0b000:
-            self.mainExe.purity = 0b100
+            self.temp_purity &= ~(1 << n)
+        if self.temp_purity == 0b000:
+            self.temp_purity = 0b100
         # print('{:03b}'.format(self.mainExe.purity))
 
     def change_category(self):
@@ -801,11 +826,11 @@ class Ui_MainWindow(QMainWindow):
         else:
             n = 0
         if isChecked:
-            self.mainExe.categories |= (1 << n)
+            self.temp_categories |= (1 << n)
         else:
-            self.mainExe.categories &= ~(1 << n)
-        if self.mainExe.categories == 0b000:
-            self.mainExe.categories = 0b110
+            self.temp_categories &= ~(1 << n)
+        if self.temp_categories == 0b000:
+            self.temp_categories = 0b110
         # print('{:03b}'.format(self.mainExe.categories))
 
     def change_sorting(self):
@@ -817,16 +842,24 @@ class Ui_MainWindow(QMainWindow):
                 self.top_range_box.show()
             else:
                 self.top_range_box.hide()
-            self.mainExe.sorting = curSorting
+            self.temp_sorting = curSorting
 
     def change_ratio(self):
         """修改比例触发"""
         curRatio = self.sender().text()
         isChecked = self.sender().isChecked()
         if isChecked:
-            self.mainExe.ratios_list.add(curRatio)
+            self.temp_ratios_list.add(curRatio)
         if not isChecked:
-            self.mainExe.ratios_list.remove(curRatio)
+            self.temp_ratios_list.remove(curRatio)
+
+    def change_auto_run(self):
+        """修改开机自启"""
+        isChecked = self.sender().isChecked()
+        if isChecked:
+            self.temp_auto_run = 1
+        if not isChecked:
+            self.temp_auto_run = 0
 
     def change_time(self):
         """修改定时触发"""
@@ -834,20 +867,48 @@ class Ui_MainWindow(QMainWindow):
         isChecked = self.sender().isChecked()
         if isChecked:
             if "关闭" == curTime:
-                self.mainExe.schedule_time = 0
+                self.temp_schedule_time = 0
             if "10分钟" == curTime:
-                self.mainExe.schedule_time = 600
+                self.temp_schedule_time = 600
             if "30分钟" == curTime:
-                self.mainExe.schedule_time = 1800
+                self.temp_schedule_time = 1800
             if "1小时" == curTime:
-                self.mainExe.schedule_time = 3600
+                self.temp_schedule_time = 3600
             if "3小时" == curTime:
-                self.mainExe.schedule_time = 10800
+                self.temp_schedule_time = 10800
             if "5小时" == curTime:
-                self.mainExe.schedule_time = 18000
-        self.mainExe.do_schedule_time()
+                self.temp_schedule_time = 18000
+
+    def check_change(self):
+        """检查有没有修改配置"""
+        if self.temp_purity != self.mainExe.purity:
+            self.mainExe.purity = self.temp_purity
+            self.config_is_changed = True
+        if self.temp_categories != self.mainExe.categories:
+            self.mainExe.categories = self.temp_categories
+            self.config_is_changed = True
+        if self.temp_sorting != self.mainExe.sorting:
+            self.mainExe.sorting = self.temp_sorting
+            self.config_is_changed = True
+        if self.temp_top_range != self.mainExe.top_range:
+            self.mainExe.top_range = self.temp_top_range
+            self.config_is_changed = True
+        if self.temp_ratios_list != self.mainExe.ratios_list:
+            self.mainExe.ratios_list = self.temp_ratios_list.copy()
+            self.config_is_changed = True
+        if self.temp_auto_run != self.mainExe.auto_run:
+            self.mainExe.auto_run = self.temp_auto_run
+        if self.temp_schedule_time != self.mainExe.schedule_time:
+            self.mainExe.schedule_time = self.temp_schedule_time
+        if self.temp_images_dir != self.mainExe.images_dir:
+            self.mainExe.images_dir = self.temp_images_dir
+            self.config_is_changed = True
+        return self.config_is_changed
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.hide_err_path_tips()
-        self.mainExe.images_ids = self.mainExe.images_ids[0:self.mainExe.current_bg_index]
+        if self.check_change():
+            self.mainExe.images_ids = self.mainExe.images_ids[0:self.mainExe.current_bg_index]
+        self.mainExe.do_schedule_time()
+        self.mainExe.do_change_auto_run()
         self.mainExe.save_config()
