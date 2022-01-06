@@ -211,11 +211,9 @@ class Wallhaven:
         return img_id
 
     def do_change_auto_run(self):
-        print(self.auto_run)
         win_function.set_auto_run(EXE_PATH, self.auto_run)
 
     def do_schedule_time(self):
-        self.save_config()
         if self.schedule_time != 0:
             if self.timer is None:
                 self.timer = BackgroundScheduler(timezone="Asia/Shanghai")

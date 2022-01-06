@@ -717,6 +717,7 @@ class Ui_MainWindow(QMainWindow):
             self.purity_sfw.setChecked(True)
         if (self.mainExe.purity >> 1) & 1 == 1:
             self.purity_sketchy.setChecked(True)
+        self.temp_purity = self.mainExe.purity
 
         # load category
         if (self.mainExe.categories >> 2) & 1 == 1:
@@ -725,6 +726,7 @@ class Ui_MainWindow(QMainWindow):
             self.cate_anime.setChecked(True)
         if self.mainExe.categories & 1 == 1:
             self.cate_people.setChecked(True)
+        self.temp_categories = self.mainExe.categories
 
         # load sorting
         self.sorting_item_map[self.mainExe.sorting].setChecked(True)
@@ -733,16 +735,21 @@ class Ui_MainWindow(QMainWindow):
             self.top_range_box.show()
         else:
             self.top_range_box.hide()
+        self.temp_sorting = self.mainExe.sorting
 
         # load ratios
+        self.temp_ratios_list.clear()
         for ratio in self.mainExe.ratios_list:
+            self.temp_ratios_list.add(ratio)
             self.ratios_item_map[ratio].setChecked(True)
 
         # load auto run
+        self.temp_auto_run = self.mainExe.auto_run
         if self.mainExe.auto_run == 1:
             self.autoRun.setChecked(True)
 
         # load time
+        self.temp_schedule_time = self.mainExe.schedule_time
         if self.mainExe.schedule_time == 0:
             self.time_close.setChecked(True)
         if self.mainExe.schedule_time == 600:
@@ -831,7 +838,7 @@ class Ui_MainWindow(QMainWindow):
             self.temp_categories &= ~(1 << n)
         if self.temp_categories == 0b000:
             self.temp_categories = 0b110
-        # print('{:03b}'.format(self.mainExe.categories))
+        # print('{:03b}'.format(self.temp_categories))
 
     def change_sorting(self):
         """修改排序触发"""
