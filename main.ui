@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1450</width>
+    <height>840</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1450</width>
+    <height>840</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1450</width>
+    <height>840</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">*{
+	font: normal 14px &quot;楷体&quot;;
+}
+
+#centralwidget{
+	background-color: rgba(39,42,44,.45);
+	border-image: url(:/images/mian_bg.jpg);
+	
+}
+
+#left_widget{
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(168, 168, 168,.15), stop:1 rgba(39,42,44,.15));
+}
+
+
+#my_bg_label,#more_info{
+	font: normal 16px &quot;楷体&quot;;
+	color:#aaa;
+	padding:5px 20px;
+}
+
+#logo_label{
+	margin-left:12px;
+}
+
+QScrollBar {
+	height:0px;
+	width:0px;
+}</string>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QWidget" name="left_widget" native="true">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>43</width>
+        <height>7</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QListWidget{
+	background: transparent;
+	outline:0px;
+	border:none;
+	font: normal 16px &quot;楷体&quot;;
+	color:#c6c6c6;
+	padding:5px 85px 5px 45px;
+}
+
+
+
+QListWidget::Item{
+	margin-top:10px;
+	background: transparent;
+}
+
+QListWidget::Item:hover,
+QListWidget::Item:selected {
+    color:#fff;
+}
+
+QListWidget::Item:selected {
+	border-bottom:2px solid qlineargradient(spread:reflect, x1:0, y1:0.016, x2:1, y2:1, stop:0.46438 rgba(0, 156, 218, 255), stop:1 rgba(255, 255, 255, 255));
+}
+
+</string>
+      </property>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>201</width>
+         <height>841</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>38</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="logo_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>150</height>
+             </size>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::DefaultContextMenu</enum>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::RightToLeft</enum>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="inputMethodHints">
+             <set>Qt::ImhHiddenText|Qt::ImhPreferNumbers</set>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="textFormat">
+             <enum>Qt::AutoText</enum>
+            </property>
+            <property name="pixmap">
+             <pixmap resource="resource.qrc">:/images/logo.svg</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            <property name="margin">
+             <number>25</number>
+            </property>
+            <property name="indent">
+             <number>-1</number>
+            </property>
+            <property name="openExternalLinks">
+             <bool>false</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::LinksAccessibleByMouse</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Maximum</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="my_bg_label">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>我的壁纸</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="my_bg_list">
+          <property name="maximumSize">
+           <size>
+            <width>16777212</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>在线壁纸</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>轮换列表</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>下载中心</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="more_info">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>更多</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="more_info_list">
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
+          </property>
+          <item>
+           <property name="text">
+            <string>设置</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>关于</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="contentWidget">
+      <property name="minimumSize">
+       <size>
+        <width>1250</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>1250</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">#contentWidget{
+	background-color: rgba(39,42,44,.25);
+}
+
+#page1_title,#page2_title,#page3_title,#page4_title,#page5_title{
+	padding:5px 0;
+	color:#fff;
+	font: normal 18px &quot;楷体&quot;;
+}</string>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>0</number>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="online_page">
+       <property name="minimumSize">
+        <size>
+         <width>1250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="page1_title">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgba(39,42,44,.35);</string>
+          </property>
+          <property name="text">
+           <string>在线壁纸</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="search_bar" native="true">
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">.QCheckBox{
+	border-radius: 3px;
+	padding:5px px 5px 0px;
+	/*width:auto;*/
+	min-width:35px;
+	max-width:60px;
+	text-align:center;
+	color: #aaa;
+    background-color:#353535;
+}
+
+.QCheckBox::checked{
+	color: #fff;
+    background-color:rgb(94, 94, 94);
+}
+
+#purity_sfw::checked{
+	color: #9f9;
+    background-color:#595;
+}
+
+#purity_sketchy::checked{
+	color: #ff9;
+    background-color:#995;
+}
+
+#purity_nsfw::checked{
+	color: #f99;
+    background-color:#955;
+}
+
+.QCheckBox::indicator{
+	width: 0px;
+}
+
+#ratio_btn{
+	border-radius: 3px;
+	padding:5px 10px 5px 10px;
+	min-width:35px;
+	text-align:center;
+	color: #fff;
+    background-color:#212224;
+	border:1px solid #353535;
+}
+
+#ratio_btn:hover {
+    background-color:#303030;
+}
+
+#search_btn{
+	border-radius: 3px;
+	padding:5px 10px 5px 10px;
+	min-width:35px;
+	text-align:center;
+	color: #fff;
+    background-color:#1f444e;
+	border:1px solid #353535;
+}
+
+#search_btn:hover{
+    background-color:#2c626f;
+}
+
+.QComboBox{
+	border-radius: 3px;
+	padding:5px 10px 5px 10px;
+	min-width:35px;
+	text-align:center;
+	color: #fff;
+    background-color:#212224;
+	border:1px solid #353535;
+}
+
+.QComboBox:hover {
+   background-color:#303030;
+}
+
+/* 下拉后，整个下拉窗体样式 */
+QComboBox QAbstractItemView {
+    outline: 0px solid gray;   /* 选定项的虚框 */
+    border: 1px solid #303030;   /* 整个下拉窗体的边框 */
+    color: #fff;
+    background-color: #303030;   /* 整个下拉窗体的背景色 */
+    selection-background-color: #696969;   /* 整个下拉窗体被选中项的背景色 */
+}
+
+/* 下拉后，整个下拉窗体每项的样式 */
+QComboBox QAbstractItemView::item {
+	color: #aaa;
+    background-color:#353535;
+}
+
+/* 下拉后，整个下拉窗体越过每项的样式 */
+QComboBox QAbstractItemView::item:hover {
+	color: #aaa;
+    background-color:#353535; /* 整个下拉窗体越过每项的背景色 */
+}
+
+/* 下拉后，整个下拉窗体被选择的每项的样式 */
+QComboBox QAbstractItemView::item:selected {
+	color: #aaa;
+    background-color:#565656;
+}
+
+QComboBox::down-arrow {
+	outline: 0px solid gray;   /* 选定项的虚框 */
+　　background: transparent; /* 下拉箭头的的背景色 */ 
+　　padding: 0px 0px 0px 0px; /* 上内边距、右内边距、下内边距、左内边距 */
+}
+
+#search_bar{
+	align-items: center;
+	background-color: rgba(39,42,44,.35);
+}
+
+</string>
+          </property>
+          <widget class="QWidget" name="layoutWidget">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1041</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="leftMargin">
+             <number>20</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QCheckBox" name="cate_general">
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">padding-left:10px</string>
+                </property>
+                <property name="text">
+                 <string>普通</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cate_anime">
+                <property name="styleSheet">
+                 <string notr="true">padding-left:10px</string>
+                </property>
+                <property name="text">
+                 <string>动漫</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cate_people">
+                <property name="minimumSize">
+                 <size>
+                  <width>45</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">padding-left:10px;
+</string>
+                </property>
+                <property name="text">
+                 <string>人物</string>
+                </property>
+                <property name="tristate">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Maximum</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>10</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QCheckBox" name="purity_sfw">
+                <property name="styleSheet">
+                 <string notr="true">padding-left:10px;</string>
+                </property>
+                <property name="text">
+                 <string> SFW</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="purity_sketchy">
+                <property name="text">
+                 <string>Sketchy</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="purity_nsfw">
+                <property name="styleSheet">
+                 <string notr="true">padding-left:10px;</string>
+                </property>
+                <property name="text">
+                 <string>NSFW</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QPushButton" name="ratio_btn">
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>比例 ▼</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="sorting_box">
+              <property name="maximumSize">
+               <size>
+                <width>90</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>热度</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>排行榜</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>随机</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>日期</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>收藏数</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>相关性</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>视图</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="sort_range">
+              <property name="minimumSize">
+               <size>
+                <width>57</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>90</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>一天</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>三天</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>一周</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>一个月</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>三个月</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>六个月</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>一年</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="search_input">
+              <property name="minimumSize">
+               <size>
+                <width>190</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:#fff;
+flex-grow: 1;
+height: 2em;
+line-height: 2em;
+padding: 0 0.5em;
+background: #1b1b1b;
+border:1px solid #353535;
+border-radius: 3px;</string>
+              </property>
+              <property name="inputMask">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="search_btn">
+              <property name="minimumSize">
+               <size>
+                <width>57</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>10</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>搜索</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="online_page_list_widget">
+          <property name="styleSheet">
+           <string notr="true">border:none;
+outline:none</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="list_page">
+       <property name="minimumSize">
+        <size>
+         <width>1250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="page2_title">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgba(39,42,44,.35);</string>
+          </property>
+          <property name="text">
+           <string>轮换列表</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="list_page_list_widget"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="download_page">
+       <property name="minimumSize">
+        <size>
+         <width>1250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="page3_title">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgba(39,42,44,.35);</string>
+          </property>
+          <property name="text">
+           <string>下载中心</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="download_page_list_widget"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="setting_page">
+       <property name="minimumSize">
+        <size>
+         <width>1250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <widget class="QLabel" name="page4_title">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>1250</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>1250</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>1250</width>
+          <height>2000</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgba(39,42,44,.35);</string>
+        </property>
+        <property name="text">
+         <string>设置</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="about_page">
+       <property name="minimumSize">
+        <size>
+         <width>1250</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>1250</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <widget class="QLabel" name="page5_title">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>1254</width>
+          <height>28</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgba(39,42,44,.35);</string>
+        </property>
+        <property name="text">
+         <string>关于</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

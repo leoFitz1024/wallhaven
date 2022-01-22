@@ -1,60 +1,192 @@
-# coding=utf-8
+# ！/usr/bin/python3
+# -*- coding: utf-8 -*-
+import _thread
+import math
 import os
+import asyncio
 import threading
+import time
+from concurrent.futures.thread import ThreadPoolExecutor
 from time import sleep
-import requests
+from urllib.request import urlopen, Request
 
-img_url_template = "https://w.wallhaven.cc/full/{0}/wallhaven-{1}"
+import requests
+from PyQt5.QtCore import QObject, pyqtSignal
+from tqdm import tqdm
 
 ua_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.57'
 }
 
+download_thread_pool = ThreadPoolExecutor(max_workers=5)
 
-class Downloader:
 
-    def __init__(self, logger):
-        self.LOGGER = logger
-        self.stop_down = False
-        self.thread = None
-        self.finished = False
-        self.download_404 = False
+class Downloader(QObject):
+    finishedSign = pyqtSignal(str)
+    canceledSign = pyqtSignal(str)
 
-    def download(self, img_id, save_dir):
-        self.thread = threading.Thread(target=self.__down, args=(img_id, save_dir))
-        self.thread.start()
+    def __init__(self, url, small, resolution, dst, filename=None):
+        super(Downloader, self).__init__()
+        self.url = url
+        self.small = small
+        self.resolution = resolution
+        self.dst = dst
+        self.filename = filename
+        # =======
+        self.process = DownloadProcess(0, 0)
+        self.finishedEvent = threading.Event()
+        self.finishedEvent.clear()
 
-    def __down(self, img_id, save_dir):
-        img_url = img_url_template.format(img_id[0:2], img_id)
-        img_req = requests.get(img_url, stream=True)
-        self.LOGGER.info("download:" + img_url)
-        if img_req.status_code == 200:
-            img_file_path = os.path.join(save_dir, img_id)
-            with open(img_file_path, 'wb') as fd:
-                for chunk in img_req.iter_content(8192):
-                    if self.stop_down:
-                        self.LOGGER.info("stop download:" + img_url)
-                        break
-                    fd.write(chunk)
-                fd.close()
-            if self.stop_down and os.path.exists(img_file_path):
-                os.remove(img_file_path)
-        elif img_req.status_code == 404:
-            self.LOGGER.error("404 error:{0} url:{1}".format(img_id, img_url))
-            self.download_404 = True
+    def start(self):
+        self.process.state = DownloadState.WAITING
+        download_thread_pool.submit(self.download)
+
+    def download(self):
+        self.process.state = DownloadState.DOWNLOADING
+        if self.filename is None:
+            self.filename = os.path.basename(self.url)
+        self.file_path = os.path.join(self.dst, self.filename)
+        self.temp_file_path = f"{self.file_path}.download"
+
+        # 判断大小一致，表示本地文件存在
+        if os.path.exists(self.file_path):
+            print("文件已经存在,无需下载.")
+            self._finished()
+            return os.path.getsize(self.file_path)
+
+        # 获取文件长度
+        try:
+            req = Request(self.url, headers=ua_headers)
+            file_size = int(urlopen(req).info().get('Content-Length', -1))
+        except Exception as e:
+            print(e)
+            print("错误，访问url: %s 异常" % self.url)
+            return False
+
+        # 判断本地文件存在时
+        if os.path.exists(self.temp_file_path):
+            # 获取文件大小
+            first_byte = os.path.getsize(self.temp_file_path)
         else:
-            self.LOGGER.error("download error:{0} url:{1}".format(img_id, img_url))
-        self.finished = True
+            # 初始大小为0
+            first_byte = 0
+
+        # 判断大小一致，表示本地文件存在
+        if first_byte >= file_size:
+            print("文件已经存在,无需下载")
+            return file_size
+
+        header = {"Range": "bytes=%s-%s" % (first_byte, file_size)}
+        # pbar = tqdm(
+        #     total=file_size, initial=first_byte,
+        #     unit='B', unit_scale=True, desc=self.url.split('/')[-1])
+        self.process.initial(file_size, first_byte)
+        # 访问url进行下载
+        req = requests.get(self.url, headers=header, stream=True)
+        try:
+            with(open(self.temp_file_path, 'ab')) as f:
+                for chunk in req.iter_content(chunk_size=1024):
+                    if self.process.state == DownloadState.CANCELED \
+                            or self.process.state == DownloadState.PAUSED:
+                        break
+                    if chunk:
+                        f.write(chunk)
+                        # pbar.update(1024)
+                        self.process.update(1024)
+
+            if self.process.state == DownloadState.CANCELED:
+                self.del_temp()
+            elif self.process.state == DownloadState.PAUSED \
+                    or self.process.state == DownloadState.FAILED:
+                pass
+            else:
+                if self.process.bytesReceived < self.process.bytesTotal:
+                    self.download()
+                else:
+                    self.do_finished()
+        except Exception as e:
+            print(e)
+            return False
+
+        # pbar.close()
+        return True
 
     def cancel(self):
-        self.stop_down = True
+        """取消下载"""
+        if self.process.state != DownloadState.CANCELED \
+                and self.process.state != DownloadState.FINISHED:
+            print("取消下载")
+            self.process.state = DownloadState.CANCELED
+            self.canceledSign.emit(self.url)
+            self.finishedEvent.set()
+
+    def pause(self):
+        """暂停下载"""
+        if self.process.state == DownloadState.DOWNLOADING \
+                or self.process.state == DownloadState.WAITING:
+            print("暂停下载")
+            self.process.state = DownloadState.PAUSED
+
+    def resume(self):
+        if self.process.state == DownloadState.PAUSED:
+            print("恢复下载")
+            self.start()
+
+    def del_temp(self):
+        if os.path.exists(self.temp_file_path):
+            os.remove(self.temp_file_path)
+
+    def do_finished(self):
+        self.finishedEvent.set()
+        self.process.state = DownloadState.FINISHED
+        self.finishedSign.emit(self.url)
+        os.rename(self.temp_file_path, self.file_path)
+        print(f"下载完成：{self.url}")
+
+
+class DownloadProcess:
+    def __init__(self, bytesTotal=0, bytesReceived=0):
+        self.state = DownloadState.INITIAL
+        self.last_bytesReceived = bytesReceived
+        self.bytesTotal = bytesTotal
+        self.bytesReceived = bytesReceived
+        self.speed = 0
+
+    def initial(self, bytesTotal, bytesReceived):
+        self.state = DownloadState.DOWNLOADING
+        self.bytesTotal = bytesTotal
+        self.bytesReceived = bytesReceived
+        self.start_cal_speed()
+
+    def update(self, bytesReceived):
+        self.bytesReceived += bytesReceived
+
+    def start_cal_speed(self):
+        _thread.start_new_thread(self.cal_speed, ())
+
+    def cal_speed(self):
+        while self.state == DownloadState.DOWNLOADING and self.bytesReceived < self.bytesTotal:
+            sleep(1)
+            self.speed = (self.bytesReceived - self.last_bytesReceived)
+            self.last_bytesReceived = self.bytesReceived
+
+
+class DownloadState:
+    INITIAL = "initial"
+    DOWNLOADING = "downloading"
+    WAITING = "waiting"
+    PAUSED = "paused"
+    CANCELED = "canceled"
+    FINISHED = "finished"
+    FAILED = "failed"
 
 
 if __name__ == '__main__':
-    url = 'https://w.wallhaven.cc/full/j3/wallhaven-j3l79p.jpg'
-    d = Downloader()
-    d.download(url, './images/wallhaven-j3l79p.jpg')
-    sleep(1)
-    d.cancel()
-    # while True:
-    #     pass
+    url = "https://w.wallhaven.cc/full/wq/wallhaven-wqwv76.jpg"
+    dst = "C:\\Users\\chen\\Downloads"
+    downloader = Downloader(url, dst)
+    downloader.start()
+    sleep(5)
+    downloader.pause()
+    sleep(5)
+    downloader.resume()

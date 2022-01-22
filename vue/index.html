@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" href="./favicon.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Vite App</title>
+    
+    <style rel="stylesheet">
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #header {
+            position: fixed;
+            top: 0;
+            height: 40px;
+            width: 100%;
+            min-width: 640px;
+            z-index: 200
+        }
+
+        @media (max-width: 639px) {
+            #header {
+                position: absolute;
+                min-width: 800px
+            }
+        }
+
+        #header {
+            color: #FFF;
+            justify-content: center;
+            -ms-flex-align: center;
+            align-items: center;
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-align: center;
+            align-items: center;
+            font-size: 1.2em;
+            white-space: nowrap;
+            background-color: #212427;
+            background-image: linear-gradient(to bottom, #292c2f 0, #191c1f 100%);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, .75);
+            box-shadow: inset 0 0 0 1px rgba(31, 31, 31, .66), 0 0 10px rgba(0, 0, 0, .75), 0 0 10px rgba(0, 0, 0, .75)
+        }
+
+        body {
+            background: #171717 url(//static.wallhaven.cc/images/layout/bg-dark-grain.png) top left repeat;
+        }
+        .customer-message {
+            padding: 8px 8px 8px 8px !important;
+            min-width: 100px !important;
+        }
+    </style>
+  <script type="module" crossorigin src="./assets/index.f1ca9b31.js"></script>
+    <link rel="modulepreload" href="./assets/vendor.e12491c8.js">
+    <link rel="stylesheet" href="./assets/index.d46d40ac.css">
+  </head>
+<body>
+<div id="app">
+
+</div>
+
+</body>
+</html>

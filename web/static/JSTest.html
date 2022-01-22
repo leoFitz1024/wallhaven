@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="text/javascript" src="./qwebchannel.js"></script>
+    <script type="text/javascript">
+        //---Web show receive message---
+        function output(message) {
+            var output = document.getElementById("output");
+            output.innerHTML = output.innerHTML + message + "\n";
+        }
+
+        function showAlert() {
+            alert('this is web alert');
+        }
+
+        //Web initial loading
+        window.onload = function () {
+            new QWebChannel(qt.webChannelTransport, function (channel) {
+                //Get Qt interact object
+                var interactObj = channel.objects.interactObj;
+                window.alert("xxx")
+                //Web send message to Qt
+                document.getElementById("send").onclick = function () {
+                    var input = document.getElementById("input");
+                    if (!input.value) {
+                        return;
+                    }
+                    output("Send string to Qt: " + input.value);
+
+                    //Web use the interface of Qt
+                    interactObj.fun(alert);
+                    interactObj.JSSendMessage(input.value);
+                    input.value = "";
+                }
+
+                //Web connect the Qt signal, then Qt can call "output" function
+                interactObj.SigSendMessageToJS.connect(function (str) {
+                    output("Received string from Qt: " + str);
+                });
+            });
+        }
+
+    </script>
+    <style type="text/css">
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
+        #input {
+            width: 650px;
+            margin: 0 10px 0 0;
+        }
+
+        #send {
+            width: 90px;
+            margin: 0;
+        }
+
+        #output {
+            width: 770px;
+            height: 550px;
+        }
+    </style>
+</head>
+<body>
+<textarea id="output" readonly="readonly"></textarea><br/>
+<input id="input"/>
+<input type="submit" id="send" value="Send" οnclick="javascript:click();"/>
+</body>
+</html>

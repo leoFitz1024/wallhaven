@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file>images/preview.jpg</file>
+    <file>images/mian_bg.jpg</file>
+    <file>images/logo.svg</file>
+  </qresource>
+</RCC>
