@@ -43,9 +43,6 @@ class HttpServer:
     @app.route('/wallhaven/:path#.+#')
     def wallhaven_api(path):
         url = f"{HttpServer.WALLHAVEN_API}{path}?{request.query_string}"
-        if "search" in path:
-            api_params = re.sub(r'&page=\d+', '', request.query_string)
-            HttpServer.WALLHAVEN_CORE.localStorage['api_params'] = api_params
         return requests.get(url)
         # return {"data": [], "meta": {
         #     "current_page": 1,
@@ -53,6 +50,13 @@ class HttpServer:
         #     "per_page": 0,
         #     "total": 0
         # }}
+
+    @staticmethod
+    @app.route('/api/online/save-param')
+    def save_param():
+        api_params = re.sub(r'&page=\d+', '', request.query_string)
+        HttpServer.WALLHAVEN_CORE.localStorage['api_params'] = api_params
+        return "success"
 
     @staticmethod
     @app.route('/api/online/download', method='POST')

@@ -1,18 +1,14 @@
 # ！/usr/bin/python3
 # -*- coding: utf-8 -*-
 import _thread
-import math
 import os
-import asyncio
 import threading
-import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from time import sleep
 from urllib.request import urlopen, Request
 
 import requests
 from PyQt5.QtCore import QObject, pyqtSignal
-from tqdm import tqdm
 
 ua_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.57'

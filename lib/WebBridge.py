@@ -7,6 +7,7 @@ class WebBridge(QObject):
     SigAddDownloadTask = pyqtSignal(str)
     SigDownloadFinished = pyqtSignal(str)
     SigDownloadCanceled = pyqtSignal(str)
+    SigSelectFolder = pyqtSignal(str)
 
     def __init__(self):
         super(WebBridge, self).__init__()

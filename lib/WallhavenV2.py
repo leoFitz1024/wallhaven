@@ -23,8 +23,6 @@
 7、定时切换
 """
 import ctypes
-
-import requests
 import win32api
 import win32con
 import win32gui
@@ -121,14 +119,14 @@ class WallhavenV2(QMainWindow):
 
     """======================ui end=========================="""
 
-    def load_config(self):
-        """加载配置文件"""
-        self.config = configparser.ConfigParser()
-        if os.path.exists(WallhavenV2.CONFIG_PATH):
-            self.config.read(WallhavenV2.CONFIG_PATH, encoding="utf-8")
-            if self.config.has_section("data"):
-                if self.config.has_option("data", "dislike_ids"):
-                    self.dislike_ids = set(json.loads(self.config.get("data", "dislike_ids")))
+    # def load_config(self):
+    #     """加载配置文件"""
+    #     self.config = configparser.ConfigParser()
+    #     if os.path.exists(WallhavenV2.CONFIG_PATH):
+    #         self.config.read(WallhavenV2.CONFIG_PATH, encoding="utf-8")
+    #         if self.config.has_section("data"):
+    #             if self.config.has_option("data", "dislike_ids"):
+    #                 self.dislike_ids = set(json.loads(self.config.get("data", "dislike_ids")))
 
     def init_images_dir(self):
         if not os.path.exists(self.localStorage['download_dir']):
@@ -229,7 +227,7 @@ class WallhavenV2(QMainWindow):
                 self.current_bg_file_path = f"{self.localStorage['download_dir']}{images[self.local_bg_index]}"
                 self.do_change_bg()
 
-    def do_local_lase_bg(self):
+    def do_local_last_bg(self):
         for root, dirs, files in os.walk(self.localStorage['download_dir']):
             images = [i for i in files if i.endswith(WallhavenV2.IMG_FILE_TYPE)]
             if len(images) > 0:

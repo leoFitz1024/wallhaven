@@ -3,10 +3,9 @@ import sys
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction, QApplication, qApp
-
-from lib.Browser import MainWindow
+import cherrypy
+import cherrypy.wsgiserver.wsgiserver3
 from lib.WallhavenV2 import WallhavenV2
-from main_browser import Ui_MainWindow
 
 
 class WallhavenIcon(QSystemTrayIcon):
