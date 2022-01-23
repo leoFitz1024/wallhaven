@@ -2,8 +2,8 @@ import sys
 from time import sleep
 
 from PyQt5 import QtWebEngineWidgets, QtCore, QtWidgets
-from PyQt5.QtCore import QUrl, QObject, QThread
-from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineDownloadItem
+from PyQt5.QtCore import QUrl, QObject
+from PyQt5.QtWebEngineWidgets import QWebEngineDownloadItem
 from PyQt5.QtWidgets import QMenu, QMainWindow, QApplication
 
 

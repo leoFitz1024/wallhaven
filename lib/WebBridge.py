@@ -7,13 +7,16 @@ class WebBridge(QObject):
     SigAddDownloadTask = pyqtSignal(str)
     SigDownloadFinished = pyqtSignal(str)
     SigDownloadCanceled = pyqtSignal(str)
+    SigSelectFolder = pyqtSignal(str)
+    SigImgFolderChanged = pyqtSignal(str)
 
     def __init__(self):
         super(WebBridge, self).__init__()
 
-    # @pyqtSlot(str)
-    # def saveBarParams(self, strParameter):
-    #     self.SigSaveParamsFromWeb.emit(strParameter)
+    @pyqtSlot(str)
+    def selectFolder(self, path):
+        print("selectFolder")
+        self.SigSelectFolder.emit(path)
     #
     # @pyqtSlot(str)
     # def loadMoreData(self, page):

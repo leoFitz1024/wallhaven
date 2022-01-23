@@ -24,22 +24,20 @@
 """
 import ctypes
 
-import requests
 import win32api
 import win32con
 import win32gui
 import _thread
-import configparser
 import json
 import os
 from threading import Thread
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QUrl, QObject, Qt, QThread
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
 from lib.Browser import Browser
 from lib.Downloader import Downloader, DownloadState
@@ -50,16 +48,25 @@ from lib.wallhavenapi import WallhavenApiV1
 
 os.environ["QTWEBENGINE_REMOTE_DEBUGGING"] = "9223"
 LOGGER = LogUtil(LOG_MODEL.console)
+BG_MODEL = [(10, 0), (6, 0), (2, 0), (0, 1), (0, 0), (22, 0)]
+"""
+填充
+适应
+拉伸
+平铺
+居中
+跨区
+"""
 
 
 class WallhavenV2(QMainWindow):
     CONFIG_PATH = f'{os.getcwd()}/config.ini'
-    DEFAULT_IMAGES_PATH = f'{os.getcwd()}/wallpaper/'
+    DEFAULT_IMAGES_PATH = f'{os.getcwd()}\\wallpaper\\'
     IMG_FILE_TYPE = (".png", ".jpeg", ".jpg", ".bmp", ".gif")
 
     def __init__(self, *args, **kwargs):
         super(WallhavenV2, self).__init__(*args, **kwargs)
-        self.wallhaven_api = WallhavenApiV1(api_key=os.getenv('APIKEY', None), verify_connection=True,
+        self.wallhaven_api = WallhavenApiV1(verify_connection=True,
                                             base_url="http://wallhaven.cc/api/v1",
                                             requestslimit_timeout=(15, 5))
         self.current_bg_file_path = ''
@@ -74,7 +81,7 @@ class WallhavenV2(QMainWindow):
         http_server_thread = Thread(target=self.http_server.start, args=[])
         http_server_thread.setDaemon(True)
         http_server_thread.start()
-        self.load_config()
+        # self.load_config()
 
     """=====================ui start==========================="""
 
@@ -112,6 +119,7 @@ class WallhavenV2(QMainWindow):
         print(self.page.profile().persistentStoragePath())
         self.page.setBackgroundColor(Qt.transparent)
         self.webBridge = WebBridge()
+        self.webBridge.SigSelectFolder.connect(self.select_image_folder)
         self.pWebChannel = QWebChannel()
         self.pWebChannel.registerObject("webBridge", self.webBridge)
         self.page.setWebChannel(self.pWebChannel)
@@ -121,33 +129,19 @@ class WallhavenV2(QMainWindow):
 
     """======================ui end=========================="""
 
-    def load_config(self):
-        """加载配置文件"""
-        self.config = configparser.ConfigParser()
-        if os.path.exists(WallhavenV2.CONFIG_PATH):
-            self.config.read(WallhavenV2.CONFIG_PATH, encoding="utf-8")
-            if self.config.has_section("data"):
-                if self.config.has_option("data", "dislike_ids"):
-                    self.dislike_ids = set(json.loads(self.config.get("data", "dislike_ids")))
+    def select_image_folder(self, path):
+        folder = QFileDialog.getExistingDirectory(self, "选择文件夹", self.localStorage['download_dir'])
+        if folder != "":
+            self.webBridge.SigImgFolderChanged.emit(folder)
 
-    def init_images_dir(self):
-        if not os.path.exists(self.localStorage['download_dir']):
-            os.makedirs(self.localStorage['download_dir'])
-
-    def init_localStorage(self):
-        self.localStorage = {
-            'api_params': 'categories=111&purity=100&sorting=hot&order=desc',
-            'api_key': '',
-            'schedule_time': 0,
-            'download_dir': WallhavenV2.DEFAULT_IMAGES_PATH,
-            'current_page': 1,
-            'page_index': 0,
-            'total_page': 0,
-            'switch_model': 'online',
-            'downloadList': {},
-            'auto_start': 0,
-            'full_model': 1,
-        }
+    # def load_config(self):
+    #     """加载配置文件"""
+    #     self.config = configparser.ConfigParser()
+    #     if os.path.exists(WallhavenV2.CONFIG_PATH):
+    #         self.config.read(WallhavenV2.CONFIG_PATH, encoding="utf-8")
+    #         if self.config.has_section("data"):
+    #             if self.config.has_option("data", "dislike_ids"):
+    #                 self.dislike_ids = set(json.loads(self.config.get("data", "dislike_ids")))
 
     def next_bg(self):
         """下一张"""
@@ -229,7 +223,7 @@ class WallhavenV2(QMainWindow):
                 self.current_bg_file_path = f"{self.localStorage['download_dir']}{images[self.local_bg_index]}"
                 self.do_change_bg()
 
-    def do_local_lase_bg(self):
+    def do_local_last_bg(self):
         for root, dirs, files in os.walk(self.localStorage['download_dir']):
             images = [i for i in files if i.endswith(WallhavenV2.IMG_FILE_TYPE)]
             if len(images) > 0:
@@ -259,13 +253,24 @@ class WallhavenV2(QMainWindow):
             }
             self.page_data.append(item)
 
-    def do_change_bg(self, bg_color=(8, 8, 8), model=6):
+    def do_change_bg(self):
         """
             :param pic: 图片路径
             :param bg_color: 颜色RGB值 tuple (122, 122, 122)
-            :param model: 2：拉伸  0：居中  6：适应  10：填充
+            :param model:
+                0填充
+                1适应
+                2拉伸
+                3平铺
+                4居中
+                5跨区
             :return:
-            """
+        """
+        bg_color_str = self.localStorage['bg_color'].replcae("rgb(", "")
+        bg_color_str = bg_color_str.replcae(")", "")
+        bg_color_str_arr = bg_color_str.split(",")
+        bg_color = (int(bg_color_str_arr[0]),int(bg_color_str_arr[1]),int(bg_color_str_arr[2]))
+        model = self.localStorage['full_model']
         try:
             print("do_change:" + self.current_bg_file_path)
             # return
@@ -276,8 +281,8 @@ class WallhavenV2(QMainWindow):
             regKey2 = win32api.RegOpenKeyEx(win32con.HKEY_CURRENT_USER, "Control Panel\\Colors", 0,
                                             win32con.KEY_SET_VALUE)
             # 设置填充风格
-            win32api.RegSetValueEx(regKey, "WallpaperStyle", 0, win32con.REG_SZ, str(model))
-            win32api.RegSetValueEx(regKey, "TileWallpaper", 0, win32con.REG_SZ, "0")
+            win32api.RegSetValueEx(regKey, "WallpaperStyle", 0, win32con.REG_SZ, str(BG_MODEL[model][0]))
+            win32api.RegSetValueEx(regKey, "TileWallpaper", 0, win32con.REG_SZ, str(BG_MODEL[model][1]))
             # 设置背景色
             r, g, b = bg_color
             color = win32api.RGB(r, g, b)
@@ -338,6 +343,26 @@ class WallhavenV2(QMainWindow):
             self.download_map[item['url']] = downloader
 
     # ==============接口方法=====================
+    def init_images_dir(self):
+        if not os.path.exists(self.localStorage['download_dir']):
+            os.makedirs(self.localStorage['download_dir'])
+
+    def init_localStorage(self):
+        self.localStorage = {
+            'api_params': 'categories=111&purity=100&sorting=hot&order=desc',
+            'api_key': '',
+            'schedule_time': 0,
+            'download_dir': WallhavenV2.DEFAULT_IMAGES_PATH,
+            'current_page': 1,
+            'page_index': 0,
+            'total_page': 0,
+            'switch_model': 'online',
+            'downloadList': {},
+            'auto_start': 0,
+            'full_model': 1,
+            'bg_color': "rgb(8,8,8)",
+        }
+
     def start_exe(self, json_data):
         """接口方法 缓存参数"""
         self.localStorage = json_data
@@ -346,6 +371,9 @@ class WallhavenV2(QMainWindow):
             res_data = self.localStorage
         else:
             res_data = "success"
+        if self.localStorage['api_key'] is not None and self.localStorage['api_key'] != '':
+            self.wallhaven_api.set_api_key()
+
         self.init_images_dir()
         self.load_download_task()
         self.update_page_data()
@@ -392,4 +420,21 @@ class WallhavenV2(QMainWindow):
             return True
         else:
             return False
-    # ==============接口方法 end=====================
+
+    def save_config(self, config):
+        old_full_model = self.localStorage['full_model']
+        if self.wallhaven_api.set_api_key(config['api_key']):
+            self.localStorage['api_key'] = config['api_key']
+            self.localStorage['schedule_time'] = config['schedule_time']
+            self.localStorage['download_dir'] = config['download_dir']
+            self.localStorage['switch_model'] = config['switch_model']
+            self.localStorage['full_model'] = config['full_model']
+            self.localStorage['auto_start'] = config['auto_start']
+            self.localStorage['bg_color'] = config['bg_color']
+            if not self.is_changing and old_full_model != self.localStorage['full_model']:
+                self.do_change_bg()
+            return "success"
+        else:
+            return "api key error"
+
+# ==============接口方法 end=====================
