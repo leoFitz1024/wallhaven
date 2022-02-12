@@ -94,8 +94,9 @@ class WallhavenV2(QMainWindow):
         self.DEFAULT_IMAGES_PATH = f'{self.ABSPATH}\\wallpaper\\'
         self.EXE_PATH = exe_path
 
-    def setIcon(self, icon: QIcon):
-        self.setWindowIcon(icon)
+    def setIcon(self, trayIcon):
+        self.setWindowIcon(trayIcon.my_icon)
+        self.trayIcon = trayIcon
 
     def setupUi(self):
         self.setObjectName("MainWindow")
@@ -163,6 +164,11 @@ class WallhavenV2(QMainWindow):
     #         if self.config.has_section("data"):
     #             if self.config.has_option("data", "dislike_ids"):
     #                 self.dislike_ids = set(json.loads(self.config.get("data", "dislike_ids")))
+
+    def dislike_current(self):
+        if os.path.exists(self.current_bg_file_path):
+            os.remove(self.current_bg_file_path)
+        self.next_bg()
 
     def next_bg(self):
         """下一张"""
@@ -254,6 +260,20 @@ class WallhavenV2(QMainWindow):
                 'resolution': img_item['resolution']
             }
             self.page_data.append(item)
+        self.check_icon_menu()
+
+    def check_icon_menu(self):
+        if self.localStorage['current_page'] == 1 \
+                and self.localStorage['page_index'] == 0:
+            self.trayIcon.last.setEnabled(False)
+        else:
+            self.trayIcon.last.setEnabled(True)
+
+        if self.localStorage['current_page'] == self.localStorage['total_page'] \
+                and self.localStorage['page_index'] == len(self.page_data) - 1:
+            self.trayIcon.next.setEnabled(False)
+        else:
+            self.trayIcon.next.setEnabled(True)
 
     def set_bg(self, img_info):
         if "small" not in img_info.keys():
@@ -343,6 +363,7 @@ class WallhavenV2(QMainWindow):
                 "local_bg_index": self.localStorage['local_bg_index'],
             }
             self.webBridge.SigUpdatePageInfo.emit(json.dumps(pageInfo))
+            self.check_icon_menu()
         except Exception as e:
             self.logger.error(e)
 

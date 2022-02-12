@@ -68,9 +68,11 @@ class HttpServer:
     @app.route('/api/online/save-param')
     def save_param():
         api_params = re.sub(r'&page=\d+', '', request.query_string)
+        print(api_params)
         HttpServer.WALLHAVEN_CORE.localStorage['api_params'] = api_params
         HttpServer.WALLHAVEN_CORE.localStorage['page_index'] = 0
         HttpServer.WALLHAVEN_CORE.localStorage['current_page'] = 1
+        HttpServer.WALLHAVEN_CORE.update_page_data()
         return "success"
 
     @staticmethod
