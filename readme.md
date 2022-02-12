@@ -12,6 +12,8 @@ nuitka --standalone --mingw64 --nofollow-imports --show-memory --show-progress -
 ```
 
 pyinstaller
+-w 无命令行
+--uac-admin
 ```commandline
-pyinstaller -D -w --i icon.ico --uac-admin  WallhavenIcon.py
+pyinstaller -D -w --i icon.ico  Wallhaven.py
 ```

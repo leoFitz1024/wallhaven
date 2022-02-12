@@ -1,9 +1,9 @@
 import json
+import logging
 import math
 import os
 import re
 
-import requests
 from bottle import Bottle, run, static_file, request, response
 
 
@@ -11,9 +11,11 @@ class HttpServer:
     WALLHAVEN_API = "https://wallhaven.cc/"
     app = Bottle()
     WALLHAVEN_CORE = None
+    logger = None
 
     def __init__(self, core):
         HttpServer.WALLHAVEN_CORE = core
+        logger = logging.getLogger("WallHaven")
 
     @staticmethod
     @app.hook('after_request')
@@ -27,7 +29,7 @@ class HttpServer:
     @staticmethod
     @app.route('/<path>')
     def static(path):
-        return static_file(path, root='./vue/')
+        return static_file(path, root=f"{HttpServer.WALLHAVEN_CORE.ABSPATH}/vue")
 
     @staticmethod
     @app.route('/assets/<path>')
@@ -37,13 +39,13 @@ class HttpServer:
             mimetype = "application/javascript"
         elif path.endswith(".css"):
             mimetype = "text/css"
-        return static_file(path, root='./vue/assets', mimetype=mimetype)
+        return static_file(path, root=f"{HttpServer.WALLHAVEN_CORE.ABSPATH}/vue/assets", mimetype=mimetype)
 
     @staticmethod
     @app.route('/wallhaven/:path#.+#')
     def wallhaven_api(path):
         url = f"{HttpServer.WALLHAVEN_API}{path}?{request.query_string}"
-        return requests.get(url)
+        return HttpServer.WALLHAVEN_CORE.wallhaven_request(url)
         # return {"data": [], "meta": {
         #     "current_page": 1,
         #     "last_page": 0,
@@ -52,31 +54,48 @@ class HttpServer:
         # }}
 
     @staticmethod
+    @app.route('/api/system/bgset', method='POST')
+    def download_img():
+        """设置壁纸"""
+        try:
+            imgInfo = json.loads(request.body.read())
+            res = HttpServer.WALLHAVEN_CORE.set_bg(imgInfo)
+            return res
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
     @app.route('/api/online/save-param')
     def save_param():
         api_params = re.sub(r'&page=\d+', '', request.query_string)
         HttpServer.WALLHAVEN_CORE.localStorage['api_params'] = api_params
+        HttpServer.WALLHAVEN_CORE.localStorage['page_index'] = 0
+        HttpServer.WALLHAVEN_CORE.localStorage['current_page'] = 1
         return "success"
 
     @staticmethod
     @app.route('/api/online/download', method='POST')
     def download_img():
         imgInfo = json.loads(request.body.read())
-        HttpServer.WALLHAVEN_CORE.download(imgInfo['url'], imgInfo['small'], imgInfo['resolution'])
-        return "success"
+        res = HttpServer.WALLHAVEN_CORE.download(imgInfo['url'], imgInfo['small'], imgInfo['resolution'])
+        if res == "file exist":
+            return "file exist"
+        else:
+            return "success"
 
     @staticmethod
     @app.route('/api/switch/list')
     def switch_list():
         per_page = 24
         root_path = HttpServer.WALLHAVEN_CORE.localStorage['download_dir']
-        page = int(request.GET.get("page"))
+        page = int(request.query.page)
         if request.GET.get("pageSize") is not None:
-            per_page = int(request.GET.get("pageSize"))
+            per_page = int(request.query.pageSize)
         try:
             images = []
             for root, dirs, files in os.walk(root_path):
                 images.extend([i for i in files if i.endswith(HttpServer.WALLHAVEN_CORE.IMG_FILE_TYPE)])
+            images = sorted(images, key=lambda x: os.path.getmtime(os.path.join(root_path, x)), reverse=True)
             meta = {
                 "current_page": page,
                 "last_page": math.ceil(len(images) / per_page),
@@ -98,6 +117,7 @@ class HttpServer:
                         "file_type": f"image/{ima_path.split('.')[1]}",
                         "path": ima_path,
                     })
+
             return {
                 'data': data,
                 "meta": meta
@@ -116,7 +136,7 @@ class HttpServer:
     @app.route('/api/download/cancel')
     def download_cancel():
         try:
-            d_url = request.GET.get("durl")
+            d_url = request.query.durl
             if HttpServer.WALLHAVEN_CORE.cancel_download(d_url):
                 return "success"
             else:
@@ -128,7 +148,7 @@ class HttpServer:
     @app.route('/api/download/pause')
     def download_pause():
         try:
-            d_url = request.GET.get("durl")
+            d_url = request.query.durl
             if HttpServer.WALLHAVEN_CORE.pause_download(d_url):
                 return "success"
             else:
@@ -140,7 +160,7 @@ class HttpServer:
     @app.route('/api/download/resume')
     def download_resume():
         try:
-            d_url = request.GET.get("durl")
+            d_url = request.query.durl
             if HttpServer.WALLHAVEN_CORE.resume_download(d_url):
                 return "success"
             else:
@@ -148,16 +168,16 @@ class HttpServer:
         except Exception as e:
             return str(e)
 
-
     @staticmethod
     @app.route('/api/local/img')
     def local_img():
         try:
-            file_path = request.GET.get("path")
+            file_path = request.query.path
             content = open(file_path, 'rb')
             response.set_header('Content-type', 'image/jpeg')
             return content
         except Exception as e:
+            HttpServer.logger.error(e)
             return str(e)
 
     @staticmethod
@@ -169,15 +189,16 @@ class HttpServer:
 
     @staticmethod
     @app.route('/api/update_config', method='POST')
-    def update_config():
+    def start_exe():
         data = json.loads(request.body.read())
         res = HttpServer.WALLHAVEN_CORE.start_exe(data)
         return res
 
     @staticmethod
     def start(host='localhost', port='1746'):
+        # run(HttpServer.app, host=host, port=port)
         run(HttpServer.app, host=host, port=port, server='cherrypy')
 
 
 if __name__ == '__main__':
-    HttpServer('11').start()
+    HttpServer(None).start()

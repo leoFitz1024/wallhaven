@@ -121,6 +121,15 @@ class WallhavenApiV1:
         self.requestslimit_timeout = requestslimit_timeout
         self.proxies = proxies
 
+    def set_api_key(self, api_key):
+        self.api_key = api_key
+        try:
+            self.my_collections()
+        except ApiKeyError:
+            self.api_key = None
+            return False
+        return True
+
     def request(self, to_json, **kwargs):
         for i in range(self.requestslimit_timeout[0] if self.requestslimit_timeout is not None else 1):
             if self.api_key is not None:

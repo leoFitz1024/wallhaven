@@ -1,3 +1,4 @@
+import logging
 import sys
 from time import sleep
 
@@ -6,10 +7,10 @@ from PyQt5.QtCore import QUrl, QObject
 from PyQt5.QtWebEngineWidgets import QWebEngineDownloadItem
 from PyQt5.QtWidgets import QMenu, QMainWindow, QApplication
 
-
 class Browser(QtWebEngineWidgets.QWebEngineView):
     def __init__(self, parent=None):
         super(Browser, self).__init__(parent)
+        self.logger = logging.getLogger("WallHaven")
 
     def setCore(self, core):
         self.core = core
@@ -20,20 +21,16 @@ class Browser(QtWebEngineWidgets.QWebEngineView):
         self.menus.popup(event.globalPos())
 
     def download_file(self, url, filename, _self, function):
-        print("download_file")
         q_url = QUrl("http://mirrors.aliyun.com/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-2009.iso")
         try:
-            print(self.page)
             self.page().download(q_url)
-            print("start")
             self.downloadFunctionMap[url] = function
             self.selfMap[url] = _self
             self.page().profile().downloadRequested.connect(self.download_function)
         except OSError as e:
-            print(e)
+            self.logger.error(e)
 
     def download_function(self, downloadItem: QWebEngineDownloadItem):
-        print(download_function)
         function = self.downloadFunctionMap.pop(downloadItem.url().url())
         _self = self.selfMap.pop(downloadItem.url().url())
         function(_self, downloadItem)
@@ -68,20 +65,11 @@ class MainWindow(QMainWindow):
         self.download()
 
     def download(self):
-        print("2")
         q_url = QUrl("http://wppkg.baidupcs.com/issue/netdisk/yunguanjia/BaiduNetdisk_6.9.4.1.exe")
         self.page.download(q_url, filename='test_download')
-        print("3")
         self.page.profile().downloadRequested.connect(self.downloadFucntion)
 
     def downloadFucntion(self, downloadItem: QWebEngineDownloadItem):
-        print("xxx")
-        print(downloadItem.path())
-        print(downloadItem.url())
-        print(downloadItem.totalBytes())
-        print(downloadItem.totalBytes())
-        print(downloadItem.downloadFileName())
-        print(downloadItem.downloadDirectory())
         downloadItem.accept()
 
 
@@ -95,17 +83,14 @@ class Downloader(QObject):
     def download(self, url, filename, _self, function):
         q_url = QUrl("http://mirrors.aliyun.com/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-2009.iso")
         try:
-            print(self.page)
             self.page.download(q_url, filename=filename)
-            print("start")
             self.downloadFunctionMap[url] = function
             self.selfMap[url] = _self
             self.page.profile().downloadRequested.connect(self.download_function)
         except OSError as e:
-            print(e)
+            self.logger.error(e)
 
     def download_function(self, downloadItem: QWebEngineDownloadItem):
-        print(download_function)
         function = self.downloadFunctionMap.pop(downloadItem.url().url())
         _self = self.selfMap.pop(downloadItem.url().url())
         function(_self, downloadItem)
@@ -116,22 +101,17 @@ class Downloader(QObject):
     def download_process(self, bytesReceived, bytesTotal):
         if self.on_process is not None:
             self.on_process(bytesReceived, bytesTotal)
-        print(f"bytesReceived:{bytesReceived}==bytesTotal:{bytesTotal}")
 
     def pause(self):
-        print("中断")
         sleep(10)
         self.downloadItem.pause()
 
     def resume(self):
         sleep(15)
-        print("继续")
-        print(self.downloadItem.isPaused())
         self.downloadItem.resume()
 
 
 def download_function(downloadItem: QWebEngineDownloadItem):
-    print("xx")
     downloadItem.accept()
 
 
