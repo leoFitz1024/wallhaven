@@ -1,0 +1,63 @@
+{
+  "name": "Wallhaven",
+  "private": true,
+  "version": "3.0.0",
+  "main": "electron/main.js",
+  "scripts": {
+    "web dev": "vite",
+    "web build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "chcp 65001 && vite build & electron .",
+    "electron:serve": "chcp 65001 && electron . ",
+    "electron:build": "vite build && electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "www.wallhaven.cc",
+    "productName": "Wallhaven",
+    "copyright": "Copyright © 2021 <Chen>",
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "logo.ico",
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist_electron"
+    }
+  },
+  "dependencies": {
+    "@electron/remote": "^2.0.8",
+    "axios": "^0.26.1",
+    "cross-env": "^7.0.3",
+    "electron-log": "^4.4.7",
+    "element-plus": "^2.1.4",
+    "ffi-napi": "^4.0.3",
+    "iconv-lite": "^0.6.3",
+    "image-size": "^1.0.1",
+    "node-gyp": "^9.0.0",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.14"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.2.0",
+    "electron": "^17.1.2",
+    "electron-builder": "^22.14.13",
+    "vite": "^2.8.0"
+  }
+}

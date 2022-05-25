@@ -1,0 +1,153 @@
+
+a, article, aside, b, body, button, code, dd, div, dl, dt, em, fieldset, footer, form, h1, h2, h3, h4, h5, header, html, i, img, input, label, legend, li, main, meter, nav, ol, p, pre, progress, section, select, small, span, strong, table, tbody, td, textarea, tfoot, th, thead, time, tr, ul {
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-color: currentColor;
+    outline: 0 none;
+    border-style: solid;
+    border-color: inherit;
+    font-size: 1em;
+    line-height: 1.3em;
+    vertical-align: baseline;
+    font-family: inherit;
+    text-decoration: none;
+    font-style: normal;
+    text-overflow: ellipsis;
+    color: inherit;
+    box-sizing: border-box;
+    -webkit-backface-visibility: hidden
+}
+
+html {
+    font-family: 'Source Sans Pro', Arial, sans, '微软雅黑';
+    font-size: 14px;
+    color: #ddd
+}
+
+article, aside, footer, header, main, nav, section {
+    display: block
+}
+
+h1, h2, h3, h4, h5, h6, legend {
+    font-family: Montserrat, 'Source Sans Pro', Arial, sans, 
+}
+
+ol li, ul li {
+    list-style-type: none
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: auto;
+    text-align: left
+}
+
+table thead {
+    border-bottom: 1px solid rgba(127, 127, 127, .5)
+}
+
+table td, table th {
+    padding: .125em .5em
+}
+
+table td time {
+    white-space: nowrap
+}
+
+img {
+    display: inline-block;
+    box-sizing: content-box
+}
+
+a {
+    transition-duration: .25s;
+    transition-property: color, background, opacity, text-shadow, box-shadow, border-color;
+    -webkit-backface-visibility: hidden
+}
+
+a:active, a:focus, a:hover {
+    text-shadow: 0 0 2px rgba(220, 255, 255, .3)
+}
+
+strong {
+    font-weight: 700
+}
+
+em {
+    font-style: italic
+}
+
+h2 {
+    font-weight: 700;
+    margin: 1.5em 0 1em;
+    padding: .25em;
+    color: #8cc;
+    border-style: dotted;
+    border-color: #333;
+    border-width: 0 0 1px 0
+}
+
+h2 a {
+    color: inherit
+}
+
+h3 {
+    margin: .5em 0 .25em
+}
+
+dl {
+    overflow: hidden
+}
+
+dl dd, dl dt {
+    position: relative;
+    display: block
+}
+
+dl dt {
+    z-index: 100;
+    float: left;
+    width: 10em;
+    text-align: right;
+    color: #85aaaf
+}
+
+dl dd {
+    z-index: 110;
+    margin-left: 10em;
+    text-align: left;
+    padding-left: 1em
+}
+
+dl dd:after {
+    content: "";
+    display: block;
+    clear: both
+}
+
+.TODO {
+    display: block;
+    font-size: .85em;
+    text-align: center;
+    font-family: monospace;
+    color: #c99;
+    opacity: .5;
+    transition-property: color, text-shadow, opacity;
+    transition-duration: .25s
+}
+
+.TODO:before {
+    content: "TODO: "
+}
+
+.TODO:hover {
+    opacity: 1;
+    color: #f55
+}
+
+body.preload * {
+    transition: none !important;
+    animation: none !important
+}
