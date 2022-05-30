@@ -27,7 +27,7 @@ Electron + Vue
 - 设置代理功能
 
 ## License ##
-This work is licensed under the [GPL3.0 License](LICENSE). If you use our work in your project, we would love you to include an acknowledgement and fill out our [survey](https://docs.google.com/forms/d/e/1FAIpQLSdR9Yhu9V1QE3pN_LvZJJyDaEpJD2cscOOqMz8N732eLDf42A/viewform?usp=sf_link).
+This work is licensed under the [GPL3.0 License](LICENSE).
 
 ## 🔋 JetBrains 开源证书支持
 
