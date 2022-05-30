@@ -90,6 +90,18 @@ export const openFolder = (data) => {
         window.ipcRenderer.once(`open-folder-receive`, (data) => resolve(data))
     })
 }
+
+/**
+ * 删除文件
+ * @param {*} path
+ */
+export const deleteFile = (path) => {
+    window.ipcRenderer.send('delete-file', path)
+    return new Promise((resolve, reject) => {
+        window.ipcRenderer.once(`delete-file-receive`, (data) => resolve(data))
+    })
+}
+
 /**
  * 打开文件所在位置
  * @param {*} data

@@ -127,6 +127,19 @@ class Wallhaven {
             })
         })
 
+        //打开文件所在位置
+        ipcMain.on("delete-file", function (event, path = {}) {
+            LOGGER.debug("receive 'delete-file':" + path)
+            fs.access(path, fs.constants.F_OK, err => {
+                if (err) {
+                    event.reply("delete-file-receive", {success: false, type: 'error', msg: '文件不存在！'})
+                } else {
+                    fs.unlinkSync(path);
+                    event.reply("delete-file-receive", {success: true, type: 'success', msg: '删除成功！'})
+                }
+            })
+        })
+
 
         //切换壁纸
         ipcMain.on("change-bg", function (event, data = {}) {
@@ -445,17 +458,21 @@ class Wallhaven {
             if (isImg) {
                 //根据文件路径获取文件信息，返回一个fs.Stats对象
                 const stats = fs.statSync(curPath);
-                if (stats.isFile()) {
-                    const imageSize = imageSizeof(curPath);
-                    const item = {
-                        "id": fileName,
-                        "path": curPath,
-                        "resolution": `${imageSize.width} x ${imageSize.height}`,
-                        "file_size": stats.size,
-                        "file_type": fileType,
-                        "ctime": stats.ctime.getTime()
+                if (stats.isFile() && stats.size > 0) {
+                    try {
+                        const imageSize = imageSizeof(curPath);
+                        const item = {
+                            "id": fileName,
+                            "path": curPath,
+                            "resolution": `${imageSize.width} x ${imageSize.height}`,
+                            "file_size": stats.size,
+                            "file_type": fileType,
+                            "ctime": stats.ctime.getTime()
+                        }
+                        that.localBgData.push(item)
+                    }catch (e){
+                        // LOGGER.error(e)
                     }
-                    that.localBgData.push(item)
                 }
             }
         });

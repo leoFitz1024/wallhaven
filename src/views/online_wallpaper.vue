@@ -221,7 +221,8 @@
           </header>
           <ul>
             <li v-for="(liItem, index) in sectionItem">
-              <figure class="thumb" v-if="customParams.category.indexOf(liItem.category) > -1"
+<!--              <figure class="thumb" v-if="customParams.category.indexOf(liItem.category) > -1"-->
+              <figure class="thumb"
                       :class="'thumb-' + (liItem.id) + ' thumb-' + (liItem.purity) + ' thumb-' + (liItem.category)"
                       :data-wallpaper-id="liItem.id" style="width:300px;height:200px">
                 <a class="thumb-btn thumb-btn-fav jsAnchor overlay-anchor" title="设为壁纸" @click="setBg(liItem)">
@@ -234,7 +235,7 @@
                   <span class="wall-res">{{ this.$formatMulti(liItem.resolution) }}</span>
                   <a class="jsAnchor overlay-anchor wall-favs">{{ this.$formatFileSize(liItem.file_size) }}</a>
                   <span v-if="liItem.file_type === 'image/png'" class="png"><span>PNG</span></span>
-                  <a class="jsAnchor thumb-tags-toggle tagged" @click="downloadImg(liItem)">
+                  <a class="jsAnchor thumb-tags-toggle tagged" title="下载" @click="downloadImg(liItem)">
                     <i class="fas fa-fw fa-download"></i>
                   </a>
                 </div>

@@ -15,7 +15,7 @@
             <li v-for="(liItem, index) in sectionItem">
               <figure class="thumb" :class="'thumb-' + (liItem.id) + ' thumb-general'"
                       :data-wallpaper-id="liItem.id" style="width:300px;height:200px">
-                <a class="thumb-btn thumb-btn-fav jsAnchor overlay-anchor" @click="setBg(liItem)">
+                <a class="thumb-btn thumb-btn-fav jsAnchor overlay-anchor" title="设为壁纸" @click="setBg(liItem)">
                   <i class="fas fa-repeat-alt"></i>
                 </a>
                 <img alt="loading" loading="lazy" style="width: 300px;height: 200px;object-fit:cover"
@@ -25,8 +25,13 @@
                 <div class="thumb-info">
                   <span class="wall-res">{{ liItem.resolution }}</span>
                   <a class="jsAnchor overlay-anchor wall-favs"
-                     data-href="https://wallhaven.cc/wallpaper/fav/x8kwd3">{{ this.$formatFileSize(liItem.file_size) }}</a>
+                     data-href="https://wallhaven.cc/wallpaper/fav/x8kwd3">{{
+                      this.$formatFileSize(liItem.file_size)
+                    }}</a>
                   <span v-if="liItem.file_type === 'png'" class="png"><span>PNG</span></span>
+                  <a class="jsAnchor thumb-tags-toggle delete-btn" title="删除" @click="deleteFile(i,index)">
+                    <i class="fas fa-fw fa-trash"></i>
+                  </a>
                 </div>
               </figure>
             </li>
@@ -44,13 +49,13 @@
 <script>
 import imgPreview from "../components/img_preview.vue";
 import pageHeader from "../components/page-header.vue";
-import {changeBg, getLocalData} from "../statics/js/ipcRenderer"
+import {changeBg, getLocalData, deleteFile} from "../statics/js/ipcRenderer"
 
 export default {
   name: "switchList",
   data() {
     return {
-      title:"本地列表",
+      title: "本地列表",
       showImgPre: false,
       preImgInfo: {},
       loading: false,
@@ -90,6 +95,20 @@ export default {
         "path": imgItem.base64
       }
     },
+    deleteFile(sectionIndex, index) {
+      const item = this.pageData.sections[sectionIndex][index]
+      deleteFile(item.path).then(res => {
+        this.$message({
+          message: res.msg,
+          type: res.type,
+          duration: res.type === "success" ? 1200 : 2000,
+          customClass: 'customer-message'
+        })
+        if(res.success){
+          this.pageData.sections[sectionIndex].splice(index,1)
+        }
+      })
+    },
     getNextPage() {
       this.pageData.currentPage++;
       this.loading = true;
@@ -117,9 +136,9 @@ export default {
         this.getNextPage();
       }
     },
-    setBg(imgInfo){
+    setBg(imgInfo) {
       let imgInfoCopy = {
-        "url":imgInfo.path
+        "url": imgInfo.path
       }
       changeBg(imgInfoCopy).then(res => {
         this.$message({
@@ -140,6 +159,10 @@ export default {
 
 #thumbs {
   padding-top: 10px;
+}
+
+.delete-btn{
+  color: #cc4433 !important;
 }
 
 #main {

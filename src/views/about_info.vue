@@ -4,10 +4,24 @@
     <div class="info-box">
       <el-card class="info-card custom-card">
         <!--        <h4>Update Github template</h4>-->
-        <p>&nbsp;&nbsp;&nbsp;&nbsp;该软件由个人开发，开发目的是因为觉得每次下载壁纸再手动去换太麻烦了，所以动手写了这个程序。
-          该软件所有数据均来自网站（wallhaven.cc）的 api 提供，如果由侵权，请联系开发者删除。
-          <br/><br/>
-          github：https://github.com/leoFitz1024/wallhaven</p>
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;该软件开源免费，由个人开发，开发目的是因为觉得每次下载壁纸再手动去换太麻烦了，所以动手写了这个程序。
+          该软件所有数据均来自网站（wallhaven.cc）的 api 提供，如有侵权，请联系开发者删除。
+        </p>
+        <br>
+        <p>开源地址：https://github.com/leoFitz1024/wallhaven</p>
+      </el-card>
+      <el-card class="info-card custom-card qr-card">
+        <h3>Good Job! 如果该软件对你有帮助，不如请作者喝杯咖啡吧。</h3>
+        <div class="qr-code-content">
+          <div class="qr-card-item">
+            <img class="qrcode" src="../statics/img/qr.jpg" alt="">
+            <h3>赞赏二维码</h3>
+          </div>
+          <div class="qr-card-item">
+            <img class="qrcode" src="../statics/img/qq.jpg" alt="">
+            <h3>问题反馈qq群</h3>
+          </div>
+        </div>
       </el-card>
     </div>
     <div class="version-box">
@@ -72,6 +86,7 @@ export default {
           "releaseTime": "2022-05-24",
           "notes": [
             "本地图片列表增加按下载时间排序。",
+            "本地图片列表增加删除按钮。",
             "修复图片保存路径中包含中文，导致切换壁纸黑屏的问题。",
             "增加自定义定时切换时间。"
           ]
@@ -101,6 +116,27 @@ export default {
 <style>
 #main {
   padding: 40px 10px 10px 10px;
+}
+
+.qr-card {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.qr-code-content {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.qr-card-item {
+  display: inline-block;
+  text-align: center;
+  margin: 0 20px 0 20px;
+}
+
+.qrcode {
+  width: 120px;
+  height: 120px;
 }
 
 .fun-list {

@@ -154,6 +154,7 @@ export default {
         'api_params': getLocalStorage("api_params", "categories=111&purity=100&sorting=hot&order=desc", "String"),
         'api_key': getLocalStorage("api_key", "", "String"),
         'schedule_time': getLocalStorage("schedule_time", 0, "Number"),
+        'custom_schedule_time': getLocalStorage("custom_schedule_time", 5, "Number"),
         'download_dir': getLocalStorage("download_dir", "", "String"),
         'current_page': getLocalStorage("current_page", 1, "Number"),
         'page_index': getLocalStorage("page_index", 0, "Number"),
