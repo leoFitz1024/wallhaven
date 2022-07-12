@@ -3,6 +3,9 @@
   <div id="WallHaven">
     <pageHeader :title="title"></pageHeader>
     <form id="searchbar" class="expanded" @click="resetSelect">
+      <div @click.stop="" id="search-keyword" class="framed searchbar-dropdown">
+        <input type="text" name="keyword" placeholder="搜索关键词（英文）"  v-model="customParams.keyword"/>
+      </div>
         <div @click.stop="" id="search-category-checks" class="framed">
           <input type="checkbox" v-model="customParams.category" name="general" value="general"
                  id="search-general"/>
@@ -167,7 +170,7 @@
                      id="search-sorting-favorites"/>
               <label for="search-sorting-favorites">收藏数</label>
               <input type="radio" v-model="customParams.sorting" name="sorting" value="toplist"
-                     id="search-sorting-toplist" checked=""/>
+                     id="search-sorting-toplist">
               <label for="search-sorting-toplist">排行榜</label>
               <input type="radio" v-model="customParams.sorting" name="sorting" value="hot"
                      id="search-sorting-hot"/>
@@ -275,6 +278,7 @@ export default {
       error: false,
       apiKey: "",
       getParams: {
+        q: "",
         category: 111,
         purity: 100,
         sorting: "hot",
@@ -288,6 +292,7 @@ export default {
       },
       customParams: {
         selector: 0,
+        keyword: "",
         category: ["general", "anime", "people"],
         purity: ["sfw"],
         sorting: "hot",
@@ -374,6 +379,9 @@ export default {
       localStorage.setItem("customParams", JSON.stringify(this.customParams))
     } else {
       this.customParams = JSON.parse(customParamsJson)
+      if(!this.customParams.keyword){
+        this.customParams.keyword = "";
+      }
     }
     this.loading = true
     this.formatGetParams()
@@ -475,6 +483,7 @@ export default {
     },
     formatGetParams() {
       this.getParams = {
+        q: "",
         category: 111,
         purity: 100,
         sorting: "hot",
@@ -486,6 +495,7 @@ export default {
         resolutions: null,
         page: 1,
       };
+      this.getParams.q = this.customParams.keyword;
       this.getParams.category = this.formatCategory();
       this.getParams.purity = this.formatPurity();
       this.getParams.sorting = this.customParams.sorting;
@@ -515,6 +525,7 @@ export default {
       this.getParams.page = this.pageData.currentPage;
       this.loading = true;
       this.error = false;
+      console.log(this.customParams)
       let apiParams = this.getApiParamStr(this.getParams)
       let apiKey = getLocalStorage("api_key", "", "String");
       if (apiKey !== "") {

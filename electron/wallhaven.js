@@ -33,6 +33,7 @@ class Wallhaven {
     constructor(mainWin) {
         this.mainWin = mainWin;
         this.currentBgUrl = "";
+        this.currentBgPath = "";
         //定时器id
         this.schedulerId = null;
         this.localStorage = {};
@@ -593,8 +594,6 @@ class Wallhaven {
             that.localStorage['switch_model'] = data['switch_model'];
             that.localStorage['auto_start'] = data['auto_start'];
             this.loadAutoStart()
-            that.localStorage['full_model'] = data['full_model'];
-            that.localStorage['bg_color'] = data['bg_color'];
             if (setKeySuccess === true) {
                 that.mainWin.webContents.send("update-config-receive", {success: true, type: 'success', msg: "保存成功"})
             } else {
@@ -603,6 +602,12 @@ class Wallhaven {
                     type: 'warning',
                     msg: "apKey 无效，已重置"
                 })
+            }
+            if((that.localStorage['full_model'] !== data['full_model'])
+                || (that.localStorage['bg_color'] !== data['bg_color'])){
+                that.localStorage['full_model'] = data['full_model'];
+                that.localStorage['bg_color'] = data['bg_color'];
+                this.refreshBg()
             }
         })
     }
@@ -736,11 +741,19 @@ class Wallhaven {
                 regUtils.addKey("HKEY_CURRENT_USER\\Control Panel\\Colors", "Background", bgColorStr).then(res => {
                     const pathBuf = iconv.encode(path, "gbk");
                     const systemParametersInfoA = user32.SystemParametersInfoA(20, 0, pathBuf, 1);
+                    this.currentBgPath = path
                     LOGGER.info("切换成功：" + path)
                 })
                 // })
             })
         })
+    }
+
+    /**
+     * 刷新一下壁纸
+     */
+    refreshBg(){
+        this.doChangeBg(this.currentBgPath)
     }
 
     /**
