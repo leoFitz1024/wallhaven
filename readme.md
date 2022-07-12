@@ -25,6 +25,7 @@ Electron + Vue
 ## 待添加功能
 
 - 设置代理功能
+- 搜索功能
 
 ## License ##
 This work is licensed under the [GPL3.0 License](LICENSE).
