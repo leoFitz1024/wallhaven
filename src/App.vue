@@ -121,7 +121,7 @@ export default {
           if (index > -1) {
             this.downloadList.splice(index,1, data);
           }else{
-            this.downloadList.splice(0,1, data);
+            this.downloadList.splice(0,0, data);
           }
           localStorage.setItem("downloadList",JSON.stringify(this.downloadList))
         }
