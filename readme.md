@@ -1,3 +1,7 @@
+# 爱发电主页（喜欢这款软件，为作者加鸡腿吧
+
+https://afdian.net/a/wallhaven
+
 # Wallhaven 桌面版
 [wallhaven.cc](https://wallhaven.cc) 是我很喜欢的一个壁纸网站，但是每次都需要把壁纸下载保存，然后再手动替换，感觉太麻烦了。
 
