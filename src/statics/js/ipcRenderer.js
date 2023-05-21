@@ -3,12 +3,10 @@
 /**
  * 启动app
  * @param {*} viewData
+ * @param {*} obj 启动参数
  */
 export const start = (obj, viewData) => {
     window.ipcRenderer.send('start', obj)
-    /* return new Promise((resolve, reject) => {
-        ipcRenderer.once(`down-file-${obj.id}`, (e, data) => resolve(data))
-    }) */
     window.ipcRenderer.once(`start`, (data) => {
         let response = JSON.parse(data)
         localStorage.setItem('download_dir', response.downloads)

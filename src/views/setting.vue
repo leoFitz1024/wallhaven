@@ -3,34 +3,45 @@
   <main id="main">
     <div class="setting-list">
       <div class="setting-group">
-        <div class="setting-group">
-          <div class="setting-group-title">系统设置</div>
-          <div class="setting-group-content">
-            <div class="setting-item">
-              <a class="setting-title">开机自启</a>
-              <div class="setting-content">
-                <el-radio class="custom-radio" v-model="autoStart" :label="0" size="large">关闭&#12288;&#12288;</el-radio>
-                <el-radio class="custom-radio" v-model="autoStart" :label="1" size="large">打开</el-radio>
-              </div>
+        <div class="setting-group-title">系统设置</div>
+        <div class="setting-group-content">
+          <div class="setting-item">
+            <a class="setting-title">开机自启</a>
+            <div class="setting-content">
+              <el-radio class="custom-radio" v-model="autoStart" :label="0" size="large">关闭&#12288;&#12288;</el-radio>
+              <el-radio class="custom-radio" v-model="autoStart" :label="1" size="large">打开</el-radio>
             </div>
-            <div class="setting-item">
-              <a class="setting-title">API Key</a>
-              <el-tooltip placement="top" effect="light" popper-class="custom-tips api-key-tooltip">
-                <template #content>设置API Key可解锁NSFW图片<br/>访问：“https://wallhaven.cc/settings/account” 获取API Key
-                </template>
-                <a class="api-key-tips"><i class="fas fa-question-circle"></i></a>
-              </el-tooltip>
-              <div class="setting-content">
-                <el-input class="api-key-input" v-model="apiKey"/>
-              </div>
+          </div>
+          <div class="setting-item">
+            <a class="setting-title">代理设置</a>
+            <el-tooltip placement="top" effect="light" popper-class="custom-tips api-key-tooltip">
+              <template #content>设置http代理，解决网络问题。</template>
+              <a class="api-key-tips"><i class="fas fa-question-circle"></i></a>
+            </el-tooltip>
+            <div class="setting-content">
+              <span>地址:</span>
+              <el-input class="proxy-input" v-model="proxy.address"/>
+              <span style="margin-left: 8%">端口:</span>
+              <el-input class="proxy-input" v-model="proxy.port"/>
             </div>
-            <div class="setting-item">
-              <a class="setting-title">壁纸文件夹</a>
-              <div class="setting-content">
-                <el-input class="images-folder" readonly="true" v-model="imagesFolder"/>
-                <button type="button" id="select-folder" @click="selectFolder">选择</button>
-                <button type="button" id="open-folder" @click="openFolder"><i class="fas fa-folder-open"></i></button>
-              </div>
+          </div>
+          <div class="setting-item">
+            <a class="setting-title">API Key</a>
+            <el-tooltip placement="top" effect="light" popper-class="custom-tips api-key-tooltip">
+              <template #content>设置API Key可解锁NSFW图片<br/>访问：“https://wallhaven.cc/settings/account” 获取API Key
+              </template>
+              <a class="api-key-tips"><i class="fas fa-question-circle"></i></a>
+            </el-tooltip>
+            <div class="setting-content">
+              <el-input class="api-key-input" v-model="apiKey"/>
+            </div>
+          </div>
+          <div class="setting-item">
+            <a class="setting-title">壁纸文件夹</a>
+            <div class="setting-content">
+              <el-input class="images-folder" readonly="true" v-model="imagesFolder"/>
+              <button type="button" id="select-folder" @click="selectFolder">选择</button>
+              <button type="button" id="open-folder" @click="openFolder"><i class="fas fa-folder-open"></i></button>
             </div>
           </div>
         </div>
@@ -103,6 +114,7 @@
 import {ElRadio, ElInput, ElInputNumber, ElTooltip, ElColorPicker, ElMessageBox} from 'element-plus'
 import pageHeader from "../components/page-header.vue";
 import {updateConfig, showOpenDialogSync, openFolder, clearData} from "../statics/js/ipcRenderer"
+import {getLocalStorage} from "../statics/js/utils";
 
 export default {
   name: "setting",
@@ -116,6 +128,10 @@ export default {
       customScheduleTime: 5,
       autoStart: 0,
       apiKey: "",
+      proxy: {
+        "address": "",
+        "port": ""
+      },
       fullModel: 0,
       bgColor: "rgb(88,88,88)"
     }
@@ -130,13 +146,14 @@ export default {
   },
   props: [],
   created() {
-    this.imagesFolder = localStorage.getItem("download_dir")
-    this.switchModel = localStorage.getItem("switch_model")
-    this.fullModel = parseInt(localStorage.getItem("full_model"))
-    this.bgColor = localStorage.getItem("bg_color")
-    this.scheduleTime = parseInt(localStorage.getItem("schedule_time"))
-    this.apiKey = localStorage.getItem("api_key")
-    this.autoStart = parseInt(localStorage.getItem("auto_start"))
+    this.imagesFolder = getLocalStorage("download_dir", "", "String")
+    this.switchModel = getLocalStorage("switch_model", "online", "String")
+    this.fullModel = getLocalStorage("full_model", 1, "Number")
+    this.bgColor = getLocalStorage("bg_color", "rgb(8,8,8)", "String")
+    this.scheduleTime = getLocalStorage("schedule_time", 0, "Number")
+    this.apiKey = getLocalStorage("api_key", "", "String")
+    this.autoStart = getLocalStorage("auto_start", 0, "Number")
+    this.proxy = getLocalStorage("proxy", {"address": "", "port": ""}, "Object")
   },
   mounted() {
   },
@@ -171,9 +188,9 @@ export default {
         "full_model": this.fullModel,
         "bg_color": this.bgColor,
         "auto_start": this.autoStart,
+        "proxy": JSON.stringify(this.proxy)
       }
       updateConfig(params).then(res => {
-        console.log(res)
         this.$message({
           message: res.msg,
           type: res.type,
@@ -189,6 +206,7 @@ export default {
           localStorage.setItem("full_model", params['full_model'])
           localStorage.setItem("bg_color", params['bg_color'])
           localStorage.setItem("auto_start", params['auto_start'])
+          localStorage.setItem("proxy", params['proxy'])
         } else {
           localStorage.setItem("api_key", '')
           this.apiKey = ''
@@ -384,10 +402,6 @@ export default {
 
 <style>
 
-.api-key-tooltip {
-  user-select: text;
-}
-
 .setting-group span {
   color: #dddddd !important;
 }
@@ -410,7 +424,13 @@ export default {
   width: 70%;
 }
 
-.aip-key-tips {
+.proxy-input{
+  display: inline-block;
+  width: 40%;
+}
+
+.api-key-tips {
+  user-select: text;
   text-align: center;
   line-height: 18px;
 }

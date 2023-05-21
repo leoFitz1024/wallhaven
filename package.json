@@ -1,7 +1,7 @@
 {
   "name": "Wallhaven",
   "private": true,
-  "version": "3.0.1",
+  "version": "3.0.2",
   "main": "electron/main.js",
   "scripts": {
     "web dev": "vite",

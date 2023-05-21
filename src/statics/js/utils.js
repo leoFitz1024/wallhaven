@@ -7,15 +7,27 @@ import {formatDate} from './date.js'
 export const getLocalStorage = (key, defaultValue, type) => {
     let value = localStorage.getItem(key)
     if (value === null || value === "undefined") {
-        localStorage.setItem(key, defaultValue)
+        console.log("key:" + key + "，初始化为默认值：" + defaultValue)
+        if (type === "Object") {
+            localStorage.setItem(key, JSON.stringify(defaultValue))
+        } else {
+            localStorage.setItem(key, defaultValue)
+        }
     }
-    let reValue;
-    if (type === "Number") {
-        reValue = parseInt(value === null || value === "undefined" ? defaultValue : value)
-    } else {
-        reValue = value === null || value === "undefined" ? defaultValue : value
+    if (value === null || value === "undefined") {
+        return defaultValue
     }
-    return reValue;
+    switch (type) {
+        case "Number":
+            value = parseInt(value)
+            break
+        case "Object":
+            value = JSON.parse(value)
+            break
+        default:
+
+    }
+    return value;
 }
 
 

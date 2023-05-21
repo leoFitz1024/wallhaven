@@ -471,7 +471,7 @@ class Wallhaven {
                             "ctime": stats.ctime.getTime()
                         }
                         that.localBgData.push(item)
-                    }catch (e){
+                    } catch (e) {
                         // LOGGER.error(e)
                     }
                 }
@@ -491,9 +491,9 @@ class Wallhaven {
         }
         if (this.localStorage['schedule_time'] !== 0) {
             let scheduleTime
-            if(this.localStorage['schedule_time'] === -1){
+            if (this.localStorage['schedule_time'] === -1) {
                 scheduleTime = this.localStorage['custom_schedule_time']
-            }else{
+            } else {
                 scheduleTime = this.localStorage['schedule_time']
             }
             LOGGER.debug(`已开启定时切换，间隔：${scheduleTime}分钟`)
@@ -524,6 +524,23 @@ class Wallhaven {
                 openAtLogin: true,
                 openAsHidden: true,
                 args: ["--autoStart"]
+            });
+        }
+    }
+
+    /**
+     * 设置网络代理
+     */
+    setProxy() {
+        const proxy = this.localStorage['proxy'];
+        if (proxy.address === "" || proxy.port === "") {
+            LOGGER.info("清除网络代理");
+            this.mainWin.webContents.session.setProxy({mode: "direct"});
+        } else {
+            LOGGER.info("设置网络代理：地址：" + proxy.address + "，端口：" + proxy.port);
+            this.mainWin.webContents.session.setProxy({
+                mode: "fixed_servers",
+                proxyRules: "http://" + proxy.address + ":" + proxy.port
             });
         }
     }
@@ -593,6 +610,9 @@ class Wallhaven {
             app.setPath("downloads", data['download_dir'])
             that.localStorage['switch_model'] = data['switch_model'];
             that.localStorage['auto_start'] = data['auto_start'];
+            const proxy = JSON.parse(data['proxy']);
+            that.localStorage['proxy'] = proxy;
+            this.setProxy()
             this.loadAutoStart()
             if (setKeySuccess === true) {
                 that.mainWin.webContents.send("update-config-receive", {success: true, type: 'success', msg: "保存成功"})
@@ -603,8 +623,8 @@ class Wallhaven {
                     msg: "apKey 无效，已重置"
                 })
             }
-            if((that.localStorage['full_model'] !== data['full_model'])
-                || (that.localStorage['bg_color'] !== data['bg_color'])){
+            if ((that.localStorage['full_model'] !== data['full_model'])
+                || (that.localStorage['bg_color'] !== data['bg_color'])) {
                 that.localStorage['full_model'] = data['full_model'];
                 that.localStorage['bg_color'] = data['bg_color'];
                 this.refreshBg()
@@ -752,7 +772,7 @@ class Wallhaven {
     /**
      * 刷新一下壁纸
      */
-    refreshBg(){
+    refreshBg() {
         this.doChangeBg(this.currentBgPath)
     }
 

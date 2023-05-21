@@ -162,6 +162,7 @@ export default {
         'total_page': getLocalStorage("total_page", 0, "Number"),
         'switch_model': getLocalStorage("switch_model", "online", "String"),
         'auto_start': getLocalStorage("auto_start", 0, "Number"),
+        'proxy': getLocalStorage("proxy", {"address": "", "port": ""}, "Object"),
         'full_model': getLocalStorage("full_model", 1, "Number"),
         'bg_color': getLocalStorage("bg_color", "rgb(8,8,8)", "String"),
       }
