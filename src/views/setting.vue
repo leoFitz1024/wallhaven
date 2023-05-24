@@ -116,6 +116,10 @@ import pageHeader from "../components/page-header.vue";
 import {updateConfig, showOpenDialogSync, openFolder, clearData} from "../statics/js/ipcRenderer"
 import {getLocalStorage} from "../statics/js/utils";
 
+const hostRegx = /^(www\.)?(([0-9]{1,3}\.){3}[0-9]{1,3}|([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,6})(:[0-9]{1,4})?$/
+const portRegx = /^([0-9]{1,5})?$/
+
+
 export default {
   name: "setting",
   data() {
@@ -177,7 +181,32 @@ export default {
         }
       })
     },
+    //检查配置格式
+    checkConfig() {
+      if (this.proxy.address !== "" && !hostRegx.test(this.proxy.address)) {
+        this.$message({
+          message: "代理地址不合法",
+          type: "error",
+          duration: 2000,
+          customClass: 'customer-message'
+        })
+        return false;
+      }
+      if (this.proxy.port !== "" && !portRegx.test(this.proxy.port)) {
+        this.$message({
+          message: "代理端口不合法",
+          type: "error",
+          duration: 2000,
+          customClass: 'customer-message'
+        })
+        return false;
+      }
+      return true
+    },
     saveConfig() {
+      if (!this.checkConfig()) {
+        return
+      }
       this.saving = true
       let params = {
         "api_key": this.apiKey,
@@ -424,7 +453,7 @@ export default {
   width: 70%;
 }
 
-.proxy-input{
+.proxy-input {
   display: inline-block;
   width: 40%;
 }

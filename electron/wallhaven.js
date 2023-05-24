@@ -610,8 +610,7 @@ class Wallhaven {
             app.setPath("downloads", data['download_dir'])
             that.localStorage['switch_model'] = data['switch_model'];
             that.localStorage['auto_start'] = data['auto_start'];
-            const proxy = JSON.parse(data['proxy']);
-            that.localStorage['proxy'] = proxy;
+            that.localStorage['proxy'] = JSON.parse(data['proxy']);
             this.setProxy()
             this.loadAutoStart()
             if (setKeySuccess === true) {
