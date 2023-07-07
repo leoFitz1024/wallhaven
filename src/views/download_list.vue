@@ -98,7 +98,7 @@ export default {
     pageHeader
   },
   created() {
-    this.imagesFolder = localStorage.getItem("download_dir")
+    this.imagesFolder = localStorage.getItem("downloadDir")
   },
   mounted() {
   },

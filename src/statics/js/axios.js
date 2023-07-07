@@ -21,18 +21,23 @@ axios.interceptors.request.use(
 
 axios.interceptors.response.use(
     response => {
-        if (response.status === 200) {
-            return Promise.resolve(response);
-        } else {
-            return Promise.reject(response);
+        switch (response.status) {
+            case 200:
+                return Promise.resolve(response);
+            default:
+                return Promise.reject(response);
         }
     },
     error => {
-        ElMessage({
-            message: `异常请求：${JSON.stringify(error.message)}`,
-            type: 'error',
-            duration: 2000
-        })
+        if (error.response.status === 401) {
+            return Promise.resolve(error.response.data);
+        } else {
+            ElMessage({
+                message: `异常请求：${JSON.stringify(error.message)}`,
+                type: 'error',
+                duration: 2000
+            })
+        }
     }
 );
 export default {
@@ -43,13 +48,15 @@ export default {
                 method: 'post',
                 url,
                 data: JSON.stringify(data),
-            })
-                .then(res => {
+            }).then((res) => {
+                if (res.data) {
                     resolve(res.data)
-                })
-                .catch(err => {
-                    reject(err)
-                });
+                } else {
+                    resolve(res.error)
+                }
+            }).catch(err => {
+                reject(err)
+            });
         })
     },
     get(url, data) {
@@ -58,13 +65,19 @@ export default {
                 method: 'get',
                 url,
                 params: data,
+            }).then((res) => {
+                if (res) {
+                    if (res.data) {
+                        resolve(res.data)
+                    } else {
+                        resolve(res.error)
+                    }
+                } else {
+                    resolve(res)
+                }
+            }).catch(err => {
+                reject(err)
             })
-                .then(res => {
-                    resolve(res.data)
-                })
-                .catch(err => {
-                    reject(err)
-                })
         })
     }
 };

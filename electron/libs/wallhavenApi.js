@@ -1,6 +1,15 @@
-const axios = require('axios');
+const AXIOS = require('axios');
+const LOGGER = require("../logger");
 
 const ALL_CATEGORIES = ['general', 'anime', 'people']
+
+let axios = AXIOS.create({
+    timeout:10000,
+    headers:{
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'
+    },
+    proxy: undefined
+})
 
 function request(url) {
     return axios.get(url)
@@ -21,6 +30,35 @@ module.exports = class WallhavenApi {
     constructor() {
         this.apiPrefix = "https://wallhaven.cc/api/v1"
         this.apikey = null
+    }
+
+    /**
+     * 设置代理
+     */
+    setProxy(proxyServer){
+        axios = AXIOS.create({
+            timeout:10000,
+            headers:{
+                'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'
+            },
+            proxy: {
+                "host": proxyServer.address,
+                "port": proxyServer.port,
+                "protocol": proxyServer.protocol,
+            }
+        })
+    }
+
+    /**
+     * 清除代理
+     */
+    clearProxy(){
+        axios = AXIOS.create({
+            timeout:10000,
+            headers:{
+                'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.43'
+            }
+        })
     }
 
     /**
@@ -54,30 +92,13 @@ module.exports = class WallhavenApi {
         return request(s)
     }
 
-    /**
-     * 检查apikey是否合法
-     */
-    checkApiKey(apikey) {
-        return new Promise((resolve, reject) => {
-            if(apikey !== ""){
-                this.myCollections(apikey).then(res => {
-                    resolve(true)
-                }).catch((e) => {
-                    resolve(false)
-                })
-            }else{
-                resolve(false)
-            }
-        })
-    }
-
     request(params, page) {
         params = params + "&page=" + page
         if (this.apikey !== null && this.apikey !== "") {
             params = params + "&apikey=" + this.apikey
         }
-        return request(this.apiPrefix + "/search?" + params)
+        const url = this.apiPrefix + "/search?" + params;
+        LOGGER.info("api request:" + url)
+        return request(url)
     }
-
-
 }

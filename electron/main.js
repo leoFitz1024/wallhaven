@@ -3,6 +3,7 @@ const {app, Tray, Menu, BrowserWindow} = require('electron')
 const path = require('path')
 const LOGGER = require('./logger');
 const Wallhaven = require('./wallhaven');
+const onAutoUpdate = require('./updater');
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -52,6 +53,7 @@ function createWindow() {
     })
     LOGGER.debug("启动参数：\r\n" + process.argv)
     let wallhaven = new Wallhaven(mainWindow);
+    onAutoUpdate(app, mainWindow)
     wallhaven.init()
     setTray(mainWindow, wallhaven)
     // and load the index.html of the app.

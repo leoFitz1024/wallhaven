@@ -118,7 +118,7 @@ export default {
         'size': 24
       }
       getLocalData(params).then(res => {
-        this.pageData.totalPage = res.total_page;
+        this.pageData.totalPage = res.totalPage;
         this.pageData.sections.push(res.data);
         this.$nextTick(() => {
           this.loading = false;

@@ -390,7 +390,7 @@ export default {
   mounted() {
     // 添加滚动事件，检测滚动到页面底部
     window.addEventListener('scroll', this.scrollEvent)
-    this.apiKey = localStorage.getItem("api_key")
+    this.apiKey = localStorage.getItem("apiKey")
   },
   unmounted() {
     // 移除滚动事件
@@ -469,7 +469,7 @@ export default {
       this.saving = true
       this.formatGetParams();
       let apiParams = this.getApiParamStr(this.getParams, true)
-      localStorage.setItem('api_params', apiParams)
+      localStorage.setItem('apiParams', apiParams)
       updatePageParams(apiParams).then(res => {
         this.$message({
           message: res.msg,
@@ -527,12 +527,12 @@ export default {
       this.error = false;
       console.log(this.customParams)
       let apiParams = this.getApiParamStr(this.getParams)
-      let apiKey = getLocalStorage("api_key", "", "String");
+      let apiKey = getLocalStorage("apiKey", "", "String");
       if (apiKey !== "") {
         apiParams = `${apiParams}&apikey=${apiKey}`
       }
       this.$axios.get(`/search?${apiParams}`, {}).then(res => {
-        this.pageData.currentPage = res.meta.current_page;
+        this.pageData.currentPage = res.meta.currentPage;
         this.pageData.totalPage = res.meta.last_page;
         this.pageData.sections.push(res.data);
         this.$nextTick(() => {

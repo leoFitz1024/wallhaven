@@ -9,9 +9,12 @@ export const start = (obj, viewData) => {
     window.ipcRenderer.send('start', obj)
     window.ipcRenderer.once(`start`, (data) => {
         let response = JSON.parse(data)
-        localStorage.setItem('download_dir', response.downloads)
+        localStorage.setItem('downloadDir', response.downloads)
         viewData.desktopInfo = response.desktopInfo
     })
+    window.ipcRenderer.on('update-message', function(event, text) {
+        console.log("版本更新消息：", text);
+    });
 }
 
 /**
@@ -41,7 +44,7 @@ export const updatePageParams = (params) => {
  * @param {*} params
  */
 export const updateConfig = (params) => {
-    window.ipcRenderer.send('update-config', params)
+    window.ipcRenderer.send('update-config', JSON.stringify(params))
     return new Promise((resolve, reject) => {
         window.ipcRenderer.once(`update-config-receive`, (data) => resolve(data))
     })

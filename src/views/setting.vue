@@ -13,16 +13,34 @@
             </div>
           </div>
           <div class="setting-item">
-            <a class="setting-title">代理设置</a>
+            <a class="setting-title">网络代理</a>
             <el-tooltip placement="top" effect="light" popper-class="custom-tips api-key-tooltip">
               <template #content>设置http代理，解决网络问题。</template>
               <a class="api-key-tips"><i class="fas fa-question-circle"></i></a>
             </el-tooltip>
+            <el-switch
+                v-model="proxy.enable"
+                inline-prompt
+                active-text="开"
+                inactive-text="关"
+                style="--el-switch-off-color: #ff4949; margin-left: 10px"
+            />
             <div class="setting-content">
-              <span>地址:</span>
+              <el-select
+                  v-model="proxy.protocol"
+                  placeholder="协议"
+                  style="width: 90px"
+              ><el-option
+                    v-for="item in protocols"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                />
+              </el-select>
+              <span style="margin-left: 4%">地址:</span>
               <el-input class="proxy-input" v-model="proxy.address"/>
-              <span style="margin-left: 8%">端口:</span>
-              <el-input class="proxy-input" v-model="proxy.port"/>
+              <span style="margin-left: 4%">端口:</span>
+              <el-input class="proxy-port-input" v-model="proxy.port"/>
             </div>
           </div>
           <div class="setting-item">
@@ -111,7 +129,7 @@
 </template>
 
 <script>
-import {ElRadio, ElInput, ElInputNumber, ElTooltip, ElColorPicker, ElMessageBox} from 'element-plus'
+import {ElRadio, ElInput, ElInputNumber, ElTooltip, ElColorPicker, ElSwitch, ElSelect, ElOption} from 'element-plus'
 import pageHeader from "../components/page-header.vue";
 import {updateConfig, showOpenDialogSync, openFolder, clearData} from "../statics/js/ipcRenderer"
 import {getLocalStorage} from "../statics/js/utils";
@@ -132,7 +150,22 @@ export default {
       customScheduleTime: 5,
       autoStart: 0,
       apiKey: "",
+      protocols: [
+        {
+          value: 'http',
+          label: 'http',
+        },{
+          value: 'socks',
+          label: 'socks',
+        }
+        // ,{
+        //   value: 'custom',
+        //   label: '自定义',
+        // }
+      ],
       proxy: {
+        "enable": false,
+        "protocol": "http",
         "address": "",
         "port": ""
       },
@@ -146,17 +179,20 @@ export default {
     ElInputNumber,
     ElTooltip,
     ElColorPicker,
+    ElSwitch,
+    ElSelect,
+    ElOption,
     pageHeader
   },
   props: [],
   created() {
-    this.imagesFolder = getLocalStorage("download_dir", "", "String")
-    this.switchModel = getLocalStorage("switch_model", "online", "String")
-    this.fullModel = getLocalStorage("full_model", 1, "Number")
-    this.bgColor = getLocalStorage("bg_color", "rgb(8,8,8)", "String")
-    this.scheduleTime = getLocalStorage("schedule_time", 0, "Number")
-    this.apiKey = getLocalStorage("api_key", "", "String")
-    this.autoStart = getLocalStorage("auto_start", 0, "Number")
+    this.imagesFolder = getLocalStorage("downloadDir", "", "String")
+    this.switchModel = getLocalStorage("switchModel", "online", "String")
+    this.fullModel = getLocalStorage("fullModel", 1, "Number")
+    this.bgColor = getLocalStorage("bgColor", "rgb(8,8,8)", "String")
+    this.scheduleTime = getLocalStorage("scheduleTime", 0, "Number")
+    this.apiKey = getLocalStorage("apiKey", "", "String")
+    this.autoStart = getLocalStorage("autoStart", 0, "Number")
     this.proxy = getLocalStorage("proxy", {"address": "", "port": ""}, "Object")
   },
   mounted() {
@@ -165,7 +201,7 @@ export default {
   },
   methods: {
     selectFolder() {
-      showOpenDialogSync(localStorage.getItem("download_dir")).then(res => {
+      showOpenDialogSync(localStorage.getItem("downloadDir")).then(res => {
         this.imagesFolder = res
       })
     },
@@ -182,7 +218,10 @@ export default {
       })
     },
     //检查配置格式
-    checkConfig() {
+    async checkConfig() {
+      return this.checkProxy() && await this.checkApiKey()
+    },
+    checkProxy() {
       if (this.proxy.address !== "" && !hostRegx.test(this.proxy.address)) {
         this.$message({
           message: "代理地址不合法",
@@ -201,23 +240,54 @@ export default {
         })
         return false;
       }
+      if (this.proxy.enable && (this.proxy.address === "" || this.proxy.port === "")){
+        this.proxy.enable = false
+      }
       return true
     },
-    saveConfig() {
-      if (!this.checkConfig()) {
+    async checkApiKey() {
+      let success = true
+      if (this.apiKey !== "") {
+        await this.$axios.get(`/search?apikey=${this.apiKey}`, {}).then(res => {
+          if (res === "Unauthorized") {
+            this.$message({
+              message: "ApiKey不正确，已重置",
+              type: "error",
+              duration: 2000,
+              customClass: 'customer-message'
+            })
+            this.apiKey = ""
+            success = false
+          }
+        }).catch(err => {
+          this.$message({
+            message: "检查ApiKey失败：" + err,
+            type: "error",
+            duration: 2000,
+            customClass: 'customer-message'
+          })
+          this.apiKey = ""
+          success = false
+        })
+      }
+      return success
+    },
+    async saveConfig() {
+      this.saving = true
+      if (!await this.checkConfig()) {
+        this.saving = false
         return
       }
-      this.saving = true
       let params = {
-        "api_key": this.apiKey,
-        "schedule_time": this.scheduleTime,
-        "custom_schedule_time": this.customScheduleTime,
-        "download_dir": this.imagesFolder,
-        "switch_model": this.switchModel,
-        "full_model": this.fullModel,
-        "bg_color": this.bgColor,
-        "auto_start": this.autoStart,
-        "proxy": JSON.stringify(this.proxy)
+        apiKey: this.apiKey,
+        scheduleTime: this.scheduleTime,
+        customScheduleTime: this.customScheduleTime,
+        downloadDir: this.imagesFolder,
+        switchModel: this.switchModel,
+        fullModel: this.fullModel,
+        bgColor: this.bgColor,
+        autoStart: this.autoStart,
+        proxy: this.proxy
       }
       updateConfig(params).then(res => {
         this.$message({
@@ -227,18 +297,15 @@ export default {
           customClass: 'customer-message'
         })
         if (res.success) {
-          localStorage.setItem("api_key", params['api_key'])
-          localStorage.setItem("schedule_time", params['schedule_time'])
-          localStorage.setItem("custom_schedule_time", params['custom_schedule_time'])
-          localStorage.setItem("download_dir", params['download_dir'])
-          localStorage.setItem("switch_model", params['switch_model'])
-          localStorage.setItem("full_model", params['full_model'])
-          localStorage.setItem("bg_color", params['bg_color'])
-          localStorage.setItem("auto_start", params['auto_start'])
-          localStorage.setItem("proxy", params['proxy'])
-        } else {
-          localStorage.setItem("api_key", '')
-          this.apiKey = ''
+          localStorage.setItem("apiKey", params['apiKey'])
+          localStorage.setItem("scheduleTime", params['scheduleTime'])
+          localStorage.setItem("customScheduleTime", params['customScheduleTime'])
+          localStorage.setItem("downloadDir", params['downloadDir'])
+          localStorage.setItem("switchModel", params['switchModel'])
+          localStorage.setItem("fullModel", params['fullModel'])
+          localStorage.setItem("bgColor", params['bgColor'])
+          localStorage.setItem("autoStart", params['autoStart'])
+          localStorage.setItem("proxy", JSON.stringify(params['proxy']))
         }
       }).finally(res => {
         this.saving = false
@@ -455,7 +522,12 @@ export default {
 
 .proxy-input {
   display: inline-block;
-  width: 40%;
+  width: 30%;
+}
+
+.proxy-port-input {
+  display: inline-block;
+  width: 80px;
 }
 
 .api-key-tips {

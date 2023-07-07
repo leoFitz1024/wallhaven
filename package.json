@@ -1,7 +1,7 @@
 {
-  "name": "Wallhaven",
+  "name": "wallhaven",
   "private": true,
-  "version": "3.0.2",
+  "version": "4.0.0",
   "main": "electron/main.js",
   "scripts": {
     "web dev": "vite",
@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "electron:dev": "chcp 65001 && vite build & electron .",
     "electron:serve": "chcp 65001 && electron . ",
-    "electron:build": "vite build && electron-builder --win --x64"
+    "electron:build": "vite build && electron-builder --win --x64",
+    "release": "vite build && electron-builder --win -p always"
   },
   "build": {
     "appId": "www.wallhaven.cc",
@@ -41,11 +42,21 @@
       "output": "dist_electron"
     }
   },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "leoFitz1024",
+      "repo": "wallhaven",
+      "private": false,
+      "releaseType": "release"
+    }
+  ],
   "dependencies": {
     "@electron/remote": "^2.0.8",
     "axios": "^0.26.1",
     "cross-env": "^7.0.3",
     "electron-log": "^4.4.7",
+    "electron-updater": "^6.1.1",
     "element-plus": "^2.1.4",
     "ffi-napi": "^4.0.3",
     "iconv-lite": "^0.6.3",

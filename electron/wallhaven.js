@@ -48,14 +48,14 @@ class Wallhaven {
         let that = this
         //启动，加载参数进内存
         ipcMain.on("start", function (event, data = {}) {
-            LOGGER.debug("start,load localStorage data:" + JSON.stringify(data))
+            LOGGER.debug("启动软件参数:" + data)
             let replyData = that.start(data);
             event.reply('start', replyData)
         })
 
         //获取本地数据
         ipcMain.on("get-local-data", function (event, data = {}) {
-            LOGGER.debug("receive 'get-local-data':" + JSON.stringify(data))
+            LOGGER.debug("获取本地数据:" + JSON.stringify(data))
             let {page, size} = data
             const localData = that.getLocalData(page, size);
             event.reply('get-local-data-receive', localData)
@@ -63,7 +63,7 @@ class Wallhaven {
 
         //更新页面参数
         ipcMain.on("update-page-params", function (event, data = {}) {
-            LOGGER.debug("receive 'update-page-params':" + JSON.stringify(data))
+            LOGGER.debug("更新页面参数:" + JSON.stringify(data))
             that.updatePageParams(data).then(r => {
                 event.reply("update-page-params-receive", {success: true, type: 'success', msg: '保存成功'})
             });
@@ -71,13 +71,12 @@ class Wallhaven {
 
         //保存设置
         ipcMain.on("update-config", function (event, data = {}) {
-            LOGGER.debug("receive 'update-config':" + JSON.stringify(data))
-            that.updateConfig(data);
+            LOGGER.debug("保存设置:" + data)
+            that.updateConfig(JSON.parse(data));
         })
 
         //选择文件夹
         ipcMain.on("show-open-dialog-sync", function (event, data = {}) {
-            LOGGER.debug("receive 'show-open-dialog-sync':" + JSON.stringify(data))
             let res = dialog.showOpenDialogSync({
                 title: '请选择文件夹',
                 // 默认打开的路径，比如这里默认打开下载文件夹
@@ -100,7 +99,6 @@ class Wallhaven {
 
         //打开路径
         ipcMain.on("open-folder", function (event, path = {}) {
-            LOGGER.debug("receive 'open-folder':" + path)
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
                     event.reply("open-folder-receive", {success: false, type: 'error', msg: '路径不存在！'})
@@ -118,7 +116,6 @@ class Wallhaven {
 
         //打开文件所在位置
         ipcMain.on("show-item-in-folder", function (event, path = {}) {
-            LOGGER.debug("receive 'show-item-in-folder':" + path)
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
                     event.reply("show-item-in-folder-receive", {success: false, type: 'error', msg: '文件已被删除！'})
@@ -130,7 +127,7 @@ class Wallhaven {
 
         //打开文件所在位置
         ipcMain.on("delete-file", function (event, path = {}) {
-            LOGGER.debug("receive 'delete-file':" + path)
+            LOGGER.debug("删除文件:" + path)
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
                     event.reply("delete-file-receive", {success: false, type: 'error', msg: '文件不存在！'})
@@ -164,12 +161,12 @@ class Wallhaven {
 
         // 下载
         ipcMain.on("download-file", function (e, data) {
-            LOGGER.debug("receive 'download-file':" + JSON.stringify(data))
+            LOGGER.debug("下载图片:" + JSON.stringify(data))
             let {url} = data
             let fileName = url.substr(url.lastIndexOf("/"))
-            let filePath = that.localStorage['download_dir'].endsWith("/") ?
-                that.localStorage['download_dir'] + fileName :
-                that.localStorage['download_dir'] + "/" + fileName;
+            let filePath = that.localStorage['downloadDir'].endsWith("/") ?
+                that.localStorage['downloadDir'] + fileName :
+                that.localStorage['downloadDir'] + "/" + fileName;
             if (!that.downloadList[url]) {
                 fs.access(filePath, fs.constants.F_OK, err => {
                     if (err) {
@@ -383,17 +380,17 @@ class Wallhaven {
      */
     start(data) {
         this.localStorage = JSON.parse(data);
-        if (this.localStorage['api_key'] !== null && this.localStorage['api_key'] !== '') {
-            this.wallhavenApi.setApikey(this.localStorage['api_key'])
+        if (this.localStorage.apiKey !== null && this.localStorage.apiKey !== '') {
+            this.wallhavenApi.setApikey(this.localStorage.apiKey)
         }
-        if (this.localStorage['download_dir'] === "") {
-            this.localStorage['download_dir'] = app.getPath("downloads")
+        if (this.localStorage.downloadDir === "") {
+            this.localStorage.downloadDir = app.getPath("downloads")
         } else {
-            app.setPath("downloads", this.localStorage['download_dir'])
+            app.setPath("downloads", this.localStorage.downloadDir)
         }
         let {width, height} = screen.getPrimaryDisplay().size;//获取到屏幕的宽度和高度
         let response = {
-            "downloads": this.localStorage['download_dir'],
+            "downloads": this.localStorage.downloadDir,
             "desktopInfo": width + " x " + height
         }
         this.initImagesDir()
@@ -401,6 +398,7 @@ class Wallhaven {
             this.loadScheduler()
         })
         this.loadAutoStart()
+        this.setProxy()
         this.loadLocalData()
         return JSON.stringify(response)
     }
@@ -428,19 +426,18 @@ class Wallhaven {
         }
 
         const totalPage = Math.ceil(this.localBgData.length / size)
-        const response = {
-            'current_page': page,
-            'total_page': totalPage,
+        return {
+            'currentPage': page,
+            'totalPage': totalPage,
             'data': data
         }
-        return response
     }
 
     /**
      * 加载本地数据
      */
     loadLocalData() {
-        let dirPath = this.localStorage['download_dir'];
+        let dirPath = this.localStorage.downloadDir;
         let that = this;
         this.localBgData.length = 0
         const files = fs.readdirSync(dirPath);
@@ -489,12 +486,12 @@ class Wallhaven {
         if (this.schedulerId !== null) {
             clearInterval(this.schedulerId)
         }
-        if (this.localStorage['schedule_time'] !== 0) {
+        if (this.localStorage.scheduleTime !== 0) {
             let scheduleTime
-            if (this.localStorage['schedule_time'] === -1) {
-                scheduleTime = this.localStorage['custom_schedule_time']
+            if (this.localStorage.scheduleTime === -1) {
+                scheduleTime = this.localStorage.customScheduleTime
             } else {
-                scheduleTime = this.localStorage['schedule_time']
+                scheduleTime = this.localStorage.scheduleTime
             }
             LOGGER.debug(`已开启定时切换，间隔：${scheduleTime}分钟`)
             let scheduleMills = scheduleTime * 60000
@@ -511,7 +508,7 @@ class Wallhaven {
      */
     loadAutoStart() {
         // 获取可执行文件位置
-        if (this.localStorage['auto_start'] === 0) {
+        if (this.localStorage.autoStart === 0) {
             // 关闭 开机自启动
             LOGGER.debug("开机自启：OFF")
             app.setLoginItemSettings({
@@ -531,17 +528,23 @@ class Wallhaven {
     /**
      * 设置网络代理
      */
-    setProxy() {
-        const proxy = this.localStorage['proxy'];
-        if (proxy.address === "" || proxy.port === "") {
-            LOGGER.info("清除网络代理");
+    setProxy(proxy) {
+        if (proxy === undefined) {
+            proxy = this.localStorage.proxy
+        }
+        LOGGER.info(`网络代理参数：开启：${proxy.enable}, 协议: ${proxy.protocol}, 地址: ${proxy.address}, 端口: ${proxy.port}`);
+        this.localStorage.proxy = proxy;
+        if (proxy.enable !== true || proxy.address === "" || proxy.port === "") {
+            LOGGER.info("关闭网络代理");
             this.mainWin.webContents.session.setProxy({mode: "direct"});
+            this.wallhavenApi.clearProxy()
         } else {
-            LOGGER.info("设置网络代理：地址：" + proxy.address + "，端口：" + proxy.port);
+            LOGGER.info("开启网络代理");
             this.mainWin.webContents.session.setProxy({
                 mode: "fixed_servers",
-                proxyRules: "http://" + proxy.address + ":" + proxy.port
+                proxyRules: proxy.protocol + "://" + proxy.address + ":" + proxy.port
             });
+            this.wallhavenApi.setProxy(proxy)
         }
     }
 
@@ -568,9 +571,9 @@ class Wallhaven {
      * 初始化下载文件夹
      */
     initImagesDir() {
-        if (!fs.existsSync(this.localStorage['download_dir'])) {
-            fs.mkdirSync(this.localStorage['download_dir'])
-            LOGGER.debug(`文件夹：${this.localStorage['download_dir']} 不存在，已自动创建。`)
+        if (!fs.existsSync(this.localStorage.downloadDir)) {
+            fs.mkdirSync(this.localStorage.downloadDir)
+            LOGGER.debug(`文件夹：${this.localStorage.downloadDir} 不存在，已自动创建。`)
         }
     }
 
@@ -578,9 +581,9 @@ class Wallhaven {
      * 更新页面参数
      */
     updatePageParams(data) {
-        this.localStorage['api_params'] = data;
-        this.localStorage['page_index'] = 0
-        this.localStorage['current_page'] = 1
+        this.localStorage.apiParams = data;
+        this.localStorage.pageIndex = 0
+        this.localStorage.currentPage = 1
         return this.updatePageData()
     }
 
@@ -589,60 +592,39 @@ class Wallhaven {
      */
     updateConfig(data) {
         let that = this
-        this.wallhavenApi.checkApiKey(data['api_key']).then(res => {
-            let setKeySuccess = true;
-            if (res) {
-                LOGGER.info("set apiKey success: " + data['api_key'])
-                that.localStorage['api_key'] = data['api_key'];
-                that.wallhavenApi.setApikey(data['api_key'])
-            } else {
-                if (data['api_key'] !== "") {
-                    LOGGER.info("set apiKey error: " + data['api_key'])
-                    that.localStorage['api_key'] = "";
-                    that.wallhavenApi.setApikey(null)
-                    setKeySuccess = false
-                }
-            }
-            that.localStorage['schedule_time'] = data['schedule_time'];
-            that.localStorage['custom_schedule_time'] = data['custom_schedule_time'];
-            that.loadScheduler()
-            that.localStorage['download_dir'] = data['download_dir'];
-            app.setPath("downloads", data['download_dir'])
-            that.localStorage['switch_model'] = data['switch_model'];
-            that.localStorage['auto_start'] = data['auto_start'];
-            that.localStorage['proxy'] = JSON.parse(data['proxy']);
-            this.setProxy()
-            this.loadAutoStart()
-            if (setKeySuccess === true) {
-                that.mainWin.webContents.send("update-config-receive", {success: true, type: 'success', msg: "保存成功"})
-            } else {
-                that.mainWin.webContents.send("update-config-receive", {
-                    success: false,
-                    type: 'warning',
-                    msg: "apKey 无效，已重置"
-                })
-            }
-            if ((that.localStorage['full_model'] !== data['full_model'])
-                || (that.localStorage['bg_color'] !== data['bg_color'])) {
-                that.localStorage['full_model'] = data['full_model'];
-                that.localStorage['bg_color'] = data['bg_color'];
-                this.refreshBg()
-            }
-        })
+        this.setProxy(data.proxy)
+        that.localStorage.scheduleTime = data.scheduleTime;
+        that.localStorage.customScheduleTime = data.customScheduleTime;
+        that.loadScheduler()
+        that.localStorage.downloadDir = data.downloadDir;
+        app.setPath("downloads", data.downloadDir)
+        that.localStorage.switchModel = data.switchModel;
+        that.localStorage.autoStart = data.autoStart;
+        this.loadAutoStart()
+        if ((that.localStorage.fullModel !== data.fullModel)
+            || (that.localStorage.bgColor !== data.bgColor)) {
+            that.localStorage.fullModel = data.fullModel;
+            that.localStorage.bgColor = data.bgColor;
+            this.refreshBg()
+        }
+        if (data.apiKey &&  data.apiKey !== "") {
+            this.wallhavenApi.setApikey(data.apiKey)
+        }
+        this.mainWin.webContents.send("update-config-receive", {success: true, type: 'success', msg: "保存成功"})
     }
 
     /**
      * 更新内存里页面数据
      */
     async updatePageData() {
-        await this.wallhavenApi.request(this.localStorage['api_params'], this.localStorage['current_page']).then(res => {
+        await this.wallhavenApi.request(this.localStorage.apiParams, this.localStorage.currentPage).then(res => {
             let data = res.data
-            if (this.localStorage['total_page'] > data['meta']['last_page']) {
-                this.localStorage['current_page'] = 1
-                this.localStorage['total_page'] = data['meta']['last_page']
+            if (this.localStorage.totalPage > data['meta']['last_page']) {
+                this.localStorage.currentPage = 1
+                this.localStorage.totalPage = data['meta']['last_page']
                 this.updatePageData()
             } else {
-                this.localStorage['total_page'] = data['meta']['last_page']
+                this.localStorage.totalPage = data['meta']['last_page']
                 this.pageData.length = 0
                 for (let i in data['data']) {
                     let imgItem = data['data'][i]
@@ -658,7 +640,7 @@ class Wallhaven {
                 }
             }
         }).catch(err => {
-            console.log(err)
+            LOGGER.error("更新内存数据失败：" + err)
         })
     }
 
@@ -666,33 +648,33 @@ class Wallhaven {
      * 上一张
      */
     lastBg() {
-        if (this.localStorage['switch_model'] === 'online') {
-            if ((0 < this.localStorage['page_index'] && this.localStorage['page_index'] < this.pageData.length) || (
-                this.localStorage['current_page'] > 1)) {
-                if (0 < this.localStorage['page_index'] < this.pageData.length) {
-                    this.localStorage['page_index']--;
-                    this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+        if (this.localStorage.switchModel === 'online') {
+            if ((0 < this.localStorage.pageIndex && this.localStorage.pageIndex < this.pageData.length) || (
+                this.localStorage.currentPage > 1)) {
+                if (0 < this.localStorage.pageIndex < this.pageData.length) {
+                    this.localStorage.pageIndex--;
+                    this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                 } else {
-                    this.localStorage['page_index'] = 0
-                    this.localStorage['current_page']--
+                    this.localStorage.pageIndex = 0
+                    this.localStorage.currentPage--
                     this.updatePageData().then(r => {
-                        this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+                        this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                     })
                 }
             } else {
-                this.localStorage['current_page'] = this.localStorage['total_page']
+                this.localStorage.currentPage = this.localStorage.totalPage
                 this.updatePageData().then(r => {
-                    this.localStorage['page_index'] = this.pageData.length - 1
-                    this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+                    this.localStorage.pageIndex = this.pageData.length - 1
+                    this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                 })
             }
         } else {
             this.loadLocalData()
             if (this.localBgData.length > 0) {
-                if (this.localStorage['local_bg_index'] > 0) {
-                    this.localStorage['local_bg_index']--
+                if (this.localStorage.local_bg_index > 0) {
+                    this.localStorage.local_bg_index--
                 } else {
-                    this.localStorage['local_bg_index'] = this.localBgData.length - 1
+                    this.localStorage.local_bg_index = this.localBgData.length - 1
                 }
                 this.doLocalChange()
             }
@@ -703,33 +685,33 @@ class Wallhaven {
      * 下一张
      */
     nextBg() {
-        if (this.localStorage['switch_model'] === 'online') {
-            if ((this.localStorage['page_index'] < this.pageData.length - 1) || (
-                this.localStorage['current_page'] < this.localStorage['total_page'])) {
-                if (this.localStorage['page_index'] < this.pageData.length - 1) {
-                    this.localStorage['page_index']++
-                    this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+        if (this.localStorage.switchModel === 'online') {
+            if ((this.localStorage.pageIndex < this.pageData.length - 1) || (
+                this.localStorage.currentPage < this.localStorage.totalPage)) {
+                if (this.localStorage.pageIndex < this.pageData.length - 1) {
+                    this.localStorage.pageIndex++
+                    this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                 } else {
-                    this.localStorage['page_index'] = 0
-                    this.localStorage['current_page']++
+                    this.localStorage.pageIndex = 0
+                    this.localStorage.currentPage++
                     this.updatePageData().then(r => {
-                        this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+                        this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                     })
                 }
             } else {
-                this.localStorage['current_page'] = 1
-                this.localStorage['page_index'] = 0
+                this.localStorage.currentPage = 1
+                this.localStorage.pageIndex = 0
                 this.updatePageData().then(r => {
-                    this.downAndChangeBg(this.pageData[this.localStorage['page_index']])
+                    this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                 })
             }
         } else {
             this.loadLocalData()
             if (this.localBgData.length > 0) {
-                if (this.localStorage['local_bg_index'] < this.localBgData.length - 1) {
-                    this.localStorage['local_bg_index']++
+                if (this.localStorage.local_bg_index < this.localBgData.length - 1) {
+                    this.localStorage.local_bg_index++
                 } else {
-                    this.localStorage['local_bg_index'] = 0
+                    this.localStorage.local_bg_index = 0
                 }
                 this.doLocalChange()
             }
@@ -742,7 +724,7 @@ class Wallhaven {
     notifyChangeBg(url) {
         if (url === this.currentBgUrl) {
             let fileName = url.substr(url.lastIndexOf("/"))
-            let filePath = path.join(this.localStorage['download_dir'], fileName)
+            let filePath = path.join(this.localStorage.downloadDir, fileName)
             this.doChangeBg(filePath)
         }
     }
@@ -752,8 +734,8 @@ class Wallhaven {
      */
     doChangeBg(path) {
         LOGGER.info("切换壁纸：" + path)
-        let bgColorStr = COLOR_REG.exec(this.localStorage['bg_color'])[1].trim().split(",").join("")
-        let model = this.localStorage['full_model']
+        let bgColorStr = COLOR_REG.exec(this.localStorage.bgColor)[1].trim().split(",").join("")
+        let model = this.localStorage.fullModel
         regUtils.addKey("HKEY_CURRENT_USER\\Control Panel\\Desktop", "WallpaperStyle", BG_MODEL[model][0]).then(r => {
             regUtils.addKey("HKEY_CURRENT_USER\\Control Panel\\Desktop", "TileWallpaper", BG_MODEL[model][1]).then(r => {
                 // regUtils.addKey("HKEY_CURRENT_USER\\Control Panel\\Desktop", "WallPaper", path).then(res => {
@@ -779,7 +761,7 @@ class Wallhaven {
      * 本地切换
      */
     doLocalChange() {
-        const bgPath = this.localBgData[this.localStorage['local_bg_index']].path;
+        const bgPath = this.localBgData[this.localStorage.local_bg_index].path;
         this.doChangeBg(bgPath);
     }
 
@@ -791,9 +773,9 @@ class Wallhaven {
         let {url} = data
         this.currentBgUrl = url
         let fileName = url.substr(url.lastIndexOf("/"))
-        let filePath = this.localStorage['download_dir'].endsWith("/") ?
-            this.localStorage['download_dir'] + fileName :
-            this.localStorage['download_dir'] + "/" + fileName;
+        let filePath = this.localStorage.downloadDir.endsWith("/") ?
+            this.localStorage.downloadDir + fileName :
+            this.localStorage.downloadDir + "/" + fileName;
         if (!this.downloadList[url]) {
             fs.access(filePath, fs.constants.F_OK, err => {
                 if (err) {
