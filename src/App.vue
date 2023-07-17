@@ -2,7 +2,8 @@
   <div class="bg-container" :class="$route.path === '/online' ? 'online-bg' : $route.path === '/switch'? 'switch-bg' :
 $route.path === '/download' ? 'download-bg' : $route.path === '/setting'? 'setting-bg' : $route.path ==='/about'? 'about-bg' : ''"></div>
   <div class="left-menu">
-    <div class="logo-wrap"></div>
+    <img class="logo-wrap" src="./statics/icons/logo.png"/>
+    <div class="version-wrap">v{{ version }}</div>
     <div class="menu-wrap">
       <label class="menu-title">我的壁纸</label>
       <ul class="menu-ul">
@@ -45,30 +46,87 @@ $route.path === '/download' ? 'download-bg' : $route.path === '/setting'? 'setti
   <div class="container" :style="{width:calContainerW + 'px'}">
     <router-view @delDownRecorder="delDownRecorder"></router-view>
   </div>
+  <el-dialog v-model="showUpdateDialog" title="版本更新" top="15%" width="25%" center>
+    <div>
+      <div style="margin-bottom: 5px">
+      检测到新的版本{{ updateInfo.version }}，是否现在进行更新？
+      </div>
+        <li v-for="item in updateInfo.releaseNotes">{{ item }}</li>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="showUpdateDialog = false">暂不更新</el-button>
+        <el-button type="primary" @click="downloadUpdate()">
+          立即更新
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
+  <div class="update-process-container" v-show="showUpdateProcessDiv">
+    <div style="text-align: center; margin-bottom: 5px">
+      正在下载新版本...{{ this.$formatSpeed(versionDownSpeed) }}
+    </div>
+    <el-progress :text-inside="true" :stroke-width="15" :percentage="versionDownPercentage" :striped="true"
+                 :striped-flow="true"/>
+  </div>
 </template>
 
 <script>
 
-import { start } from "./statics/js/ipcRenderer"
-import { downloadFile } from "./statics/js/download"
-import { getTime } from "./statics/js/date"
-import { updateDownloadState} from "./statics/js/download"
-import { getLocalStorage} from "./statics/js/utils"
+import {start} from "./statics/js/ipcRenderer"
+import {downloadFile} from "./statics/js/download"
+import {getTime} from "./statics/js/date"
+import {updateDownloadState} from "./statics/js/download"
+import {
+  onUpdateMessage,
+  onUpdateErrorMessage,
+  sendDownloadUpdate,
+  onDownloadProgress
+} from "./statics/js/update"
+import {getLocalStorage} from "./statics/js/utils"
+import {ElMessage, ElMessageBox, ElProgress, ElButton, ElDialog} from 'element-plus'
 
 export default {
   name: 'App',
   data() {
     return {
+      //显示版本更新提示框
+      showUpdateDialog: false,
+      //新版信息
+      updateInfo: {
+        version: "",
+        releaseNotes: []
+      },
+      //是否显示版本下载div
+      showUpdateProcessDiv: false,
+      //新版本下载进度
+      versionDownPercentage: 0,
+      //新版本下载速度
+      versionDownSpeed: 0,
+      //app版本
+      version: APP_VERSION,
       clientWidth: 700,
       desktopInfo: "",
+      //图片下载列表
       downloadList: [],
+      //图片下载完成列表
       downloadFinishedList: []
     }
+  },
+  components: {
+    ElProgress,
+    ElMessage,
+    ElMessageBox,
+    ElButton,
+    ElDialog
   },
   created() {
     this.loadDownloadFinishedList()
     this.loadDownloadList()
     updateDownloadState(this.updateDownloadState)
+    onUpdateMessage(this.showUpdateMessage)
+    onUpdateErrorMessage(this.showUpdateErrorMessage)
+    onDownloadProgress(this.updateVersionDownloadProgress)
   },
   mounted() {
     this.clientWidth = document.documentElement.clientWidth;
@@ -102,44 +160,69 @@ export default {
     addDownloadFile(task) {
       return downloadFile(task)
     },
-    // 更新状态
+    //显示更新消息
+    showUpdateMessage(info) {
+      this.updateInfo = info;
+      this.showUpdateDialog = true
+    },
+    //显示更新失败提示
+    showUpdateErrorMessage(error) {
+      ElMessageBox.alert('更新失败' + error, '错误', {
+        confirmButtonText: '确认',
+        callback: (action) => {
+        },
+      })
+      this.showUpdateDialog = false
+      this.showUpdateProcessDiv = false
+    },
+    downloadUpdate() {
+      this.showUpdateDialog = false
+      this.showUpdateProcessDiv = true
+      sendDownloadUpdate()
+    },
+    //更新新版本下载进度
+    updateVersionDownloadProgress(progress) {
+      this.versionDownPercentage = progress.percentage
+      this.versionDownSpeed = progress.speed
+    },
+    // 更新图片下载状态
     updateDownloadState(data) {
       this.$nextTick(() => {
-        let { id, done, progress, state} = data;
+        let {id, done, progress, state} = data;
         let index = this.downloadList.findIndex(item => item.id === id)
         if (done) {
           if (progress === 100) {
-            let { id, path, resolution, size, small, url } = data
-            this.downloadFinishedList.splice(0, 0, { id, path, resolution, size, small, url, time: getTime() })
+            let {id, path, resolution, size, small, url} = data
+            this.downloadFinishedList.splice(0, 0, {id, path, resolution, size, small, url, time: getTime()})
             if (index > -1) this.downloadList.splice(index, 1)
-          }else if(state === "cancelled"){
+          } else if (state === "cancelled") {
             if (index > -1) this.downloadList.splice(index, 1)
           }
-          localStorage.setItem("downloadList",JSON.stringify(this.downloadList))
-          localStorage.setItem("downloadFinishedList",JSON.stringify(this.downloadFinishedList))
+          localStorage.setItem("downloadList", JSON.stringify(this.downloadList))
+          localStorage.setItem("downloadFinishedList", JSON.stringify(this.downloadFinishedList))
         } else {
           if (index > -1) {
-            this.downloadList.splice(index,1, data);
-          }else{
-            this.downloadList.splice(0,0, data);
+            this.downloadList.splice(index, 1, data);
+          } else {
+            this.downloadList.splice(0, 0, data);
           }
-          localStorage.setItem("downloadList",JSON.stringify(this.downloadList))
+          localStorage.setItem("downloadList", JSON.stringify(this.downloadList))
         }
       })
     },
     loadDownloadFinishedList() {
-      let downloadFinishedListStr = getLocalStorage("downloadFinishedList","[]","String")
+      let downloadFinishedListStr = getLocalStorage("downloadFinishedList", "[]", "String")
       if (downloadFinishedListStr != null) {
         this.downloadFinishedList = JSON.parse(downloadFinishedListStr)
         if (this.downloadFinishedList.length > 20) {
-          this.downloadFinishedList.splice(19,this.downloadFinishedList.length - 20)
+          this.downloadFinishedList.splice(19, this.downloadFinishedList.length - 20)
           localStorage.setItem("downloadFinishedList", JSON.stringify(this.downloadFinishedList))
         }
 
       }
     },
-    loadDownloadList(){
-      let downloadListStr = getLocalStorage("downloadList","[]","String")
+    loadDownloadList() {
+      let downloadListStr = getLocalStorage("downloadList", "[]", "String")
       if (downloadListStr != null) {
         this.downloadList = JSON.parse(downloadListStr)
         this.downloadList.forEach(item => item.state = "paused")
@@ -169,7 +252,6 @@ export default {
       start(JSON.stringify(localStorageMap), this)
     }
   },
-  components: {},
   computed: {
     calContainerW() {
       let width = this.clientWidth - 200;
@@ -192,6 +274,29 @@ a:visited {
   text-decoration: none;
 }
 
+.logo-wrap {
+  margin: 10px 0 2px 0;
+  padding: 0 8px 0 8px;
+  width: 95%;
+}
+
+.version-wrap {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.update-process-container {
+  padding-top: 5px;
+  z-index: 999;
+  width: 100%;
+  bottom: 0;
+  position: fixed;
+  background: rgba(96, 96, 96, 0.87);
+  -moz-box-shadow: 0 -3px 9px #070805;
+  -webkit-box-shadow: 0 -3px 9px #070805;
+  box-shadow: 0 -3px 9px #070805;
+}
+
 .bg-container {
   position: fixed;
   top: 0;
@@ -203,8 +308,6 @@ a:visited {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: left top;
-  top: 0;
-  left: 0;
   z-index: -1;
   transition: background 0.8s;
 }
@@ -254,15 +357,6 @@ a:visited {
   /*background-color: rgba(39, 42, 44, .75);*/
   /*background-image: linear-gradient(to right, #292c2f 0, rgba(34, 34, 34, .5) 100%);*/
   box-shadow: 0 0 0 1px #222, 5px 0px 5px rgb(0 0 0 / 50%);
-}
-
-.logo-wrap {
-  width: 100%;
-  height: 150px;
-  background: url("./statics/icons/logo.png") no-repeat;
-  background-size: 90%;
-  background-position: 40% 20%;
-
 }
 
 .menu-title {

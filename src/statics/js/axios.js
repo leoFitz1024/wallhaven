@@ -29,11 +29,11 @@ axios.interceptors.response.use(
         }
     },
     error => {
-        if (error.response.status === 401) {
+        if (error.response && error.response.status === 401) {
             return Promise.resolve(error.response.data);
         } else {
             ElMessage({
-                message: `异常请求：${JSON.stringify(error.message)}`,
+                message: `请求失败，请检查网络环境和代理设置：${JSON.stringify(error.message)}`,
                 type: 'error',
                 duration: 2000
             })

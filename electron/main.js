@@ -15,6 +15,12 @@ if (!gotTheLock) {
     app.quit()
 } else {
     try {
+        //开发模式调试自动更新
+        // Object.defineProperty(app, 'isPackaged', {
+        //     get() {
+        //         return true;
+        //     }
+        // });
         app.whenReady().then(() => {
             createWindow()
             app.on('activate', function () {
@@ -125,7 +131,7 @@ function setTray(mainWindow, wallhaven) {
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
     // 设置托盘悬浮提示
-    appTray.setToolTip('wallhaven 3.0');
+    appTray.setToolTip('wallhaven ' + process.env.npm_package_version);
     // 设置托盘菜单
     appTray.setContextMenu(contextMenu);
     // 单机托盘小图标显示应用

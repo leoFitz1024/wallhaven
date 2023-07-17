@@ -23,6 +23,7 @@
                 inline-prompt
                 active-text="开"
                 inactive-text="关"
+                @click="closeProxy()"
                 style="--el-switch-off-color: #ff4949; margin-left: 10px"
             />
             <div class="setting-content">
@@ -131,7 +132,7 @@
 <script>
 import {ElRadio, ElInput, ElInputNumber, ElTooltip, ElColorPicker, ElSwitch, ElSelect, ElOption} from 'element-plus'
 import pageHeader from "../components/page-header.vue";
-import {updateConfig, showOpenDialogSync, openFolder, clearData} from "../statics/js/ipcRenderer"
+import {updateConfig, showOpenDialogSync, openFolder, clearData, sendCloseProxy} from "../statics/js/ipcRenderer"
 import {getLocalStorage} from "../statics/js/utils";
 
 const hostRegx = /^(www\.)?(([0-9]{1,3}\.){3}[0-9]{1,3}|([a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,6})(:[0-9]{1,4})?$/
@@ -221,6 +222,12 @@ export default {
     async checkConfig() {
       return this.checkProxy() && await this.checkApiKey()
     },
+    //关闭网络代理
+    closeProxy(){
+      if(this.proxy.enable !== true){
+        sendCloseProxy()
+      }
+    },
     checkProxy() {
       if (this.proxy.address !== "" && !hostRegx.test(this.proxy.address)) {
         this.$message({
@@ -248,7 +255,7 @@ export default {
     async checkApiKey() {
       let success = true
       if (this.apiKey !== "") {
-        await this.$axios.get(`/search?apikey=${this.apiKey}`, {}).then(res => {
+        await this.$wallhavenApi.search(`/search?apikey=${this.apiKey}`).then(res => {
           if (res === "Unauthorized") {
             this.$message({
               message: "ApiKey不正确，已重置",
@@ -279,7 +286,6 @@ export default {
         return
       }
       let params = {
-        apiKey: this.apiKey,
         scheduleTime: this.scheduleTime,
         customScheduleTime: this.customScheduleTime,
         downloadDir: this.imagesFolder,

@@ -1,4 +1,6 @@
 const {screen, app, ipcMain, session, Notification, shell, DownloadItem, dialog} = require('electron');
+const APP_IPC = require('./common/appIPC.cjs');
+const DOWNLOAD_IPC = require('./common/downloadIPC.cjs');
 const LOGGER = require('./logger');
 const imageSizeof = require('image-size');
 const ffi = require('ffi-napi')
@@ -41,42 +43,68 @@ class Wallhaven {
         this.pageData = []
         //本地壁纸数据
         this.localBgData = []
-        this.wallhavenApi = new WallhavenApi()
+        this.wallhavenApi = new WallhavenApi(mainWin)
     }
 
     init() {
         let that = this
         //启动，加载参数进内存
-        ipcMain.on("start", function (event, data = {}) {
+        ipcMain.on(APP_IPC.START, function (event, data = {}) {
             LOGGER.debug("启动软件参数:" + data)
             let replyData = that.start(data);
-            event.reply('start', replyData)
+            event.reply(APP_IPC.START, replyData)
         })
 
         //获取本地数据
-        ipcMain.on("get-local-data", function (event, data = {}) {
+        ipcMain.on(APP_IPC.GET_DOWNLOADED_IMG, function (event, data = {}) {
             LOGGER.debug("获取本地数据:" + JSON.stringify(data))
             let {page, size} = data
             const localData = that.getLocalData(page, size);
-            event.reply('get-local-data-receive', localData)
+            event.reply(APP_IPC.GET_DOWNLOADED_IMG, localData)
         })
 
         //更新页面参数
-        ipcMain.on("update-page-params", function (event, data = {}) {
+        ipcMain.on(APP_IPC.UPDATE_PAGE_PARAMS, function (event, data = {}) {
             LOGGER.debug("更新页面参数:" + JSON.stringify(data))
             that.updatePageParams(data).then(r => {
-                event.reply("update-page-params-receive", {success: true, type: 'success', msg: '保存成功'})
+                event.reply(APP_IPC.UPDATE_PAGE_PARAMS, {success: true, type: 'success', msg: '保存成功'})
             });
         })
 
         //保存设置
-        ipcMain.on("update-config", function (event, data = {}) {
+        ipcMain.on(APP_IPC.SAVE_CONFIG, function (event, data = {}) {
             LOGGER.debug("保存设置:" + data)
             that.updateConfig(JSON.parse(data));
         })
 
+        //关闭代理
+        ipcMain.on(APP_IPC.CLOSE_PROXY, function (event, data = {}) {
+            LOGGER.debug("关闭网络代理");
+            that.closeProxy();
+        })
+
+        //切换壁纸
+        ipcMain.on(APP_IPC.CHANGE_BG, function (event, data = {}) {
+            LOGGER.debug("下载并切换壁纸:" + JSON.stringify(data))
+            let {url} = data
+            if (url.startsWith("http")) {
+                that.downAndChangeBg(data);
+                event.reply(APP_IPC.CHANGE_BG, {success: true, type: 'success', msg: '切换中...'})
+            } else {
+                fs.access(url, fs.constants.F_OK, err => {
+                    if (err) {
+                        LOGGER.debug(`check file '${url}' access error:`, err)
+                        event.reply(APP_IPC.CHANGE_BG, {success: true, type: 'success', msg: '本地文件不存在'})
+                    } else {
+                        that.doChangeBg(url);
+                        event.reply(APP_IPC.CHANGE_BG, {success: true, type: 'success', msg: '切换中...'})
+                    }
+                })
+            }
+        })
+
         //选择文件夹
-        ipcMain.on("show-open-dialog-sync", function (event, data = {}) {
+        ipcMain.on(APP_IPC.SELECT_FOLDER_DIALOG, function (event, data = {}) {
             let res = dialog.showOpenDialogSync({
                 title: '请选择文件夹',
                 // 默认打开的路径，比如这里默认打开下载文件夹
@@ -93,21 +121,21 @@ class Wallhaven {
                 message: '请选择文件夹'
             })
             if (res !== undefined) {
-                event.reply("show-open-dialog-receive", res[0])
+                event.reply(APP_IPC.SELECT_FOLDER_DIALOG, res[0])
             }
         })
 
         //打开路径
-        ipcMain.on("open-folder", function (event, path = {}) {
+        ipcMain.on(APP_IPC.OPEN_FOLDER, function (event, path = {}) {
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
-                    event.reply("open-folder-receive", {success: false, type: 'error', msg: '路径不存在！'})
+                    event.reply(APP_IPC.OPEN_FOLDER, {success: false, type: 'error', msg: '路径不存在！'})
                 } else {
                     shell.openPath(path).then(res => {
                         if (res === "") {
-                            event.reply("open-folder-receive", {success: true, type: 'success', msg: 'success'})
+                            event.reply(APP_IPC.OPEN_FOLDER, {success: true, type: 'success', msg: 'success'})
                         } else {
-                            event.reply("open-folder-receive", {success: false, type: 'error', msg: 'res'})
+                            event.reply(APP_IPC.OPEN_FOLDER, {success: false, type: 'error', msg: 'res'})
                         }
                     })
                 }
@@ -115,58 +143,37 @@ class Wallhaven {
         })
 
         //打开文件所在位置
-        ipcMain.on("show-item-in-folder", function (event, path = {}) {
+        ipcMain.on(APP_IPC.SHOW_FILE_FOLDER, function (event, path = {}) {
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
-                    event.reply("show-item-in-folder-receive", {success: false, type: 'error', msg: '文件已被删除！'})
+                    event.reply(APP_IPC.SHOW_FILE_FOLDER, {success: false, type: 'error', msg: '文件已被删除！'})
                 } else {
                     shell.showItemInFolder(path)
                 }
             })
         })
 
-        //打开文件所在位置
-        ipcMain.on("delete-file", function (event, path = {}) {
+        //删除文件
+        ipcMain.on(APP_IPC.DELETE_FILE, function (event, path = {}) {
             LOGGER.debug("删除文件:" + path)
             fs.access(path, fs.constants.F_OK, err => {
                 if (err) {
-                    event.reply("delete-file-receive", {success: false, type: 'error', msg: '文件不存在！'})
+                    event.reply(APP_IPC.DELETE_FILE, {success: false, type: 'error', msg: '文件不存在！'})
                 } else {
                     fs.unlinkSync(path);
-                    event.reply("delete-file-receive", {success: true, type: 'success', msg: '删除成功！'})
+                    event.reply(APP_IPC.DELETE_FILE, {success: true, type: 'success', msg: '删除成功！'})
                 }
             })
         })
 
-
-        //切换壁纸
-        ipcMain.on("change-bg", function (event, data = {}) {
-            LOGGER.debug("receive 'change-bg':" + JSON.stringify(data))
-            let {url} = data
-            if (url.startsWith("http")) {
-                that.downAndChangeBg(data);
-                event.reply("change-bg-receive", {success: true, type: 'success', msg: '切换中...'})
-            } else {
-                fs.access(url, fs.constants.F_OK, err => {
-                    if (err) {
-                        LOGGER.debug(`check file '${url}' access error:`, err)
-                        event.reply("change-bg-receive", {success: true, type: 'success', msg: '本地文件不存在'})
-                    } else {
-                        that.doChangeBg(url);
-                        event.reply("change-bg-receive", {success: true, type: 'success', msg: '切换中...'})
-                    }
-                })
-            }
-        })
-
         // 下载
-        ipcMain.on("download-file", function (e, data) {
+        ipcMain.on(DOWNLOAD_IPC.DOWNLOAD_FILE, function (e, data) {
             LOGGER.debug("下载图片:" + JSON.stringify(data))
             let {url} = data
             let fileName = url.substr(url.lastIndexOf("/"))
-            let filePath = that.localStorage['downloadDir'].endsWith("/") ?
-                that.localStorage['downloadDir'] + fileName :
-                that.localStorage['downloadDir'] + "/" + fileName;
+            let filePath = that.localStorage.downloadDir.endsWith("/") ?
+                that.localStorage.downloadDir + fileName :
+                that.localStorage.downloadDir + "/" + fileName;
             if (!that.downloadList[url]) {
                 fs.access(filePath, fs.constants.F_OK, err => {
                     if (err) {
@@ -176,33 +183,37 @@ class Wallhaven {
                         data.done = false;
                         that.downloadList[url] = {...data}
                         that.downloadFile(url)
-                        e.reply("download-file-" + url, {success: true, type: 'success', msg: '已加入下载列表'})
+                        e.reply(`${DOWNLOAD_IPC.DOWNLOAD_FILE}-${url}`, {
+                            success: true,
+                            type: 'success',
+                            msg: '已加入下载列表'
+                        })
                     } else {
-                        e.reply("download-file-" + url, {success: false, type: 'warning', msg: '文件已存在'})
+                        e.reply(`${DOWNLOAD_IPC.DOWNLOAD_FILE}-${url}`, {success: false, type: 'warning', msg: '文件已存在'})
                     }
                 })
             } else {
-                e.reply("download-file-" + url, {success: false, type: 'warning', msg: '文件正在下载中'})
+                e.reply(`${DOWNLOAD_IPC.DOWNLOAD_FILE}-${url}`, {success: false, type: 'warning', msg: '文件正在下载中'})
             }
         })
 
         // 暂停
-        ipcMain.on("download-file-pause", function (e, data) {
-            LOGGER.debug("receive 'download-file-pause':" + JSON.stringify(data))
+        ipcMain.on(DOWNLOAD_IPC.DOWNLOAD_FILE_PAUSE, function (e, data) {
+            LOGGER.debug("暂停下载：" + JSON.stringify(data))
             let url = data
             let t = that.downloadList[url]
             if (t) {
                 t._downloadFileItem.pause()
-                e.reply("download-file-pause-" + url, {success: true, type: 'success', msg: '已暂停'})
+                e.reply(`${DOWNLOAD_IPC.DOWNLOAD_FILE_PAUSE}-${url}`, {success: true, type: 'success', msg: '已暂停'})
             } else {
-                e.reply("download-file-pause-" + url, {success: false, type: 'warning', msg: '文件未在下载中'})
+                e.reply(`${DOWNLOAD_IPC.DOWNLOAD_FILE_PAUSE}-${url}`, {success: false, type: 'warning', msg: '文件未在下载中'})
             }
 
         })
 
         // 断点恢复下载
-        ipcMain.on("resume-download", function (e, data) {
-            LOGGER.debug("receive 'resume-download':" + data)
+        ipcMain.on(DOWNLOAD_IPC.RESUME_DOWNLOAD, function (e, data) {
+            LOGGER.debug("继续下载：" + data)
             data = JSON.parse(data)
             let {url} = data
             let t = that.downloadList[url]
@@ -212,32 +223,19 @@ class Wallhaven {
                 that.downloadList[url] = {...data}
                 that.resumeDownload(data)
             }
-            e.reply("download-file-resume-" + url, '已恢复下载')
-        })
-
-        // 继续
-        //未用到
-        ipcMain.on("download-file-resume", function (e, data) {
-            LOGGER.debug("receive 'download-file-resume':" + JSON.stringify(data))
-            let {url} = data
-            let t = that.downloadList[url]
-            if (t) {
-                t._downloadFileItem.resume()
-                e.reply("download-file-resume-" + url, {success: true, type: 'success', msg: '已恢复下载'})
-            }
-
+            e.reply(`${DOWNLOAD_IPC.RESUME_DOWNLOAD}-url`, '已恢复下载')
         })
 
         // 取消下载
-        ipcMain.on("download-file-cancel", function (e, data) {
-            LOGGER.debug("receive 'download-file-cancel':" + JSON.stringify(data))
+        ipcMain.on(DOWNLOAD_IPC.DOWNLOAD_CANCEL, function (e, data) {
+            LOGGER.debug("取消下载：" + JSON.stringify(data))
             let url = data
             let t = that.downloadList[url]
             if (t) {
                 t._downloadFileItem.cancel()
-                e.reply("download-file-cancel-" + url, {success: true, type: 'success', msg: '已取消下载'})
+                e.reply(`${DOWNLOAD_IPC.DOWNLOAD_CANCEL}-${url}`, {success: true, type: 'success', msg: '已取消下载'})
             } else {
-                e.reply("download-file-cancel-" + url, {success: false, type: 'error', msg: '文件未在下载中'})
+                e.reply(`${DOWNLOAD_IPC.DOWNLOAD_CANCEL}-${url}`, {success: false, type: 'error', msg: '文件未在下载中'})
                 // 删除未下在完成文件
             }
         })
@@ -247,8 +245,8 @@ class Wallhaven {
             that.mainWin.webContents.toggleDevTools();
         })
 
-        // 重启
-        ipcMain.on("clear-data", function () {
+        //清除数据
+        ipcMain.on(APP_IPC.CLEAR_DATA, function () {
             LOGGER.debug("清除应用数据。")
             const clearObj = {
                 storages: ['appcache', 'filesystem', 'localstorage', 'shadercache', 'websql', 'serviceworkers', 'cachestorage'],
@@ -263,18 +261,18 @@ class Wallhaven {
         })
 
         // 重启
-        ipcMain.on("restart", function () {
+        ipcMain.on(APP_IPC.RESTART, function () {
             app.relaunch();
             app.exit(0)
         })
 
         // 最小化
-        ipcMain.on("min", function () {
+        ipcMain.on(APP_IPC.MIN_WINDOW, function () {
             that.mainWin.minimize()
         })
 
         // 最大化
-        ipcMain.on("max", function () {
+        ipcMain.on(APP_IPC.MAX_WINDOW, function () {
             if (that.mainWin.isMaximized()) {
                 that.mainWin.unmaximize()
             } else {
@@ -283,7 +281,7 @@ class Wallhaven {
         })
 
         // 关闭程序
-        ipcMain.on("close", function () {
+        ipcMain.on(APP_IPC.CLOSE_WINDOW, function () {
             LOGGER.debug("最小化到托盘.")
             that.mainWin.hide();
             new Notification({
@@ -291,6 +289,10 @@ class Wallhaven {
                 body: "Wallhaven已最小化到托盘",
                 icon: path.join(__dirname, 'app.png')
             }).show();
+        })
+
+        ipcMain.on(APP_IPC.OPEN_LINK, (event, url) => {
+            shell.openExternal(url);
         })
 
         // 监听下载
@@ -332,7 +334,7 @@ class Wallhaven {
                             downloadItem.offset = offset
                         }
                     }
-                    !downloadItem.notSend && that.mainWin.webContents.send("update-download-state", JSON.parse(JSON.stringify(downloadItem)));
+                    !downloadItem.notSend && that.mainWin.webContents.send(DOWNLOAD_IPC.UPDATE_DOWNLOAD_STATE, JSON.parse(JSON.stringify(downloadItem)));
                 })
 
                 // 下载完成
@@ -351,7 +353,7 @@ class Wallhaven {
                             break;
                     }
                     if (downloadItem.state !== 'cancelled') {
-                        !downloadItem.notSend && that.mainWin.webContents.send("update-download-state", JSON.parse(JSON.stringify(downloadItem)))
+                        !downloadItem.notSend && that.mainWin.webContents.send(DOWNLOAD_IPC.UPDATE_DOWNLOAD_STATE, JSON.parse(JSON.stringify(downloadItem)))
                         if (state === "completed") {
                             this.notifyChangeBg(url)
                         }
@@ -380,9 +382,6 @@ class Wallhaven {
      */
     start(data) {
         this.localStorage = JSON.parse(data);
-        if (this.localStorage.apiKey !== null && this.localStorage.apiKey !== '') {
-            this.wallhavenApi.setApikey(this.localStorage.apiKey)
-        }
         if (this.localStorage.downloadDir === "") {
             this.localStorage.downloadDir = app.getPath("downloads")
         } else {
@@ -537,15 +536,20 @@ class Wallhaven {
         if (proxy.enable !== true || proxy.address === "" || proxy.port === "") {
             LOGGER.info("关闭网络代理");
             this.mainWin.webContents.session.setProxy({mode: "direct"});
-            this.wallhavenApi.clearProxy()
         } else {
             LOGGER.info("开启网络代理");
             this.mainWin.webContents.session.setProxy({
                 mode: "fixed_servers",
                 proxyRules: proxy.protocol + "://" + proxy.address + ":" + proxy.port
             });
-            this.wallhavenApi.setProxy(proxy)
         }
+    }
+
+    /**
+     * 关闭代理
+     */
+    closeProxy() {
+        this.mainWin.webContents.session.setProxy({mode: "direct"});
     }
 
     /**
@@ -607,41 +611,41 @@ class Wallhaven {
             that.localStorage.bgColor = data.bgColor;
             this.refreshBg()
         }
-        if (data.apiKey &&  data.apiKey !== "") {
-            this.wallhavenApi.setApikey(data.apiKey)
-        }
-        this.mainWin.webContents.send("update-config-receive", {success: true, type: 'success', msg: "保存成功"})
+        this.mainWin.webContents.send(APP_IPC.SAVE_CONFIG, {success: true, type: 'success', msg: "保存成功"})
     }
 
     /**
      * 更新内存里页面数据
      */
     async updatePageData() {
-        await this.wallhavenApi.request(this.localStorage.apiParams, this.localStorage.currentPage).then(res => {
-            let data = res.data
-            if (this.localStorage.totalPage > data['meta']['last_page']) {
-                this.localStorage.currentPage = 1
-                this.localStorage.totalPage = data['meta']['last_page']
-                this.updatePageData()
-            } else {
-                this.localStorage.totalPage = data['meta']['last_page']
-                this.pageData.length = 0
-                for (let i in data['data']) {
-                    let imgItem = data['data'][i]
-                    let item = {
-                        "id": imgItem.id,
-                        'url': imgItem['path'],
-                        "size": imgItem['file_size'],
-                        'colors': imgItem['colors'],
-                        'small': imgItem['thumbs']['small'],
-                        'resolution': imgItem['resolution']
+        await this.wallhavenApi.search(`${this.localStorage.apiParams}&page=${this.localStorage.currentPage}`,
+            (data) => {
+                if (data) {
+                    LOGGER.info("更新内存数据成功")
+                    if (this.localStorage.totalPage > data['meta']['last_page']) {
+                        this.localStorage.currentPage = 1
+                        this.localStorage.totalPage = data['meta']['last_page']
+                        this.updatePageData()
+                    } else {
+                        this.localStorage.totalPage = data['meta']['last_page']
+                        this.pageData.length = 0
+                        for (let i in data['data']) {
+                            let imgItem = data['data'][i]
+                            let item = {
+                                "id": imgItem.id,
+                                'url': imgItem['path'],
+                                "size": imgItem['file_size'],
+                                'colors': imgItem['colors'],
+                                'small': imgItem['thumbs']['small'],
+                                'resolution': imgItem['resolution']
+                            }
+                            this.pageData.push(item)
+                        }
                     }
-                    this.pageData.push(item)
+                } else {
+                    LOGGER.error("更新内存数据失败")
                 }
-            }
-        }).catch(err => {
-            LOGGER.error("更新内存数据失败：" + err)
-        })
+            })
     }
 
     /**
@@ -702,6 +706,7 @@ class Wallhaven {
                 this.localStorage.currentPage = 1
                 this.localStorage.pageIndex = 0
                 this.updatePageData().then(r => {
+                    console.log(r)
                     this.downAndChangeBg(this.pageData[this.localStorage.pageIndex])
                 })
             }
@@ -770,21 +775,25 @@ class Wallhaven {
      * @param data
      */
     downAndChangeBg(data) {
-        let {url} = data
-        this.currentBgUrl = url
-        let fileName = url.substr(url.lastIndexOf("/"))
-        let filePath = this.localStorage.downloadDir.endsWith("/") ?
-            this.localStorage.downloadDir + fileName :
-            this.localStorage.downloadDir + "/" + fileName;
-        if (!this.downloadList[url]) {
-            fs.access(filePath, fs.constants.F_OK, err => {
-                if (err) {
-                    this.downloadList[url] = {...data}
-                    this.downloadFile(url)
-                } else {
-                    this.notifyChangeBg(url)
-                }
-            })
+        if (data) {
+            let {url} = data
+            this.currentBgUrl = url
+            let fileName = url.substr(url.lastIndexOf("/"))
+            let filePath = this.localStorage.downloadDir.endsWith("/") ?
+                this.localStorage.downloadDir + fileName :
+                this.localStorage.downloadDir + "/" + fileName;
+            if (!this.downloadList[url]) {
+                fs.access(filePath, fs.constants.F_OK, err => {
+                    if (err) {
+                        this.downloadList[url] = {...data}
+                        this.downloadFile(url)
+                    } else {
+                        this.notifyChangeBg(url)
+                    }
+                })
+            }
+        } else {
+            LOGGER.error("切换壁纸失败：data is undefined.")
         }
     }
 

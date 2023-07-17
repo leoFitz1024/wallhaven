@@ -525,21 +525,21 @@ export default {
       this.getParams.page = this.pageData.currentPage;
       this.loading = true;
       this.error = false;
-      console.log(this.customParams)
       let apiParams = this.getApiParamStr(this.getParams)
       let apiKey = getLocalStorage("apiKey", "", "String");
       if (apiKey !== "") {
         apiParams = `${apiParams}&apikey=${apiKey}`
       }
-      this.$axios.get(`/search?${apiParams}`, {}).then(res => {
-        this.pageData.currentPage = res.meta.currentPage;
-        this.pageData.totalPage = res.meta.last_page;
+      this.$wallhavenApi.search(apiParams).then(res => {
+        this.pageData.currentPage = res.meta['current_page'];
+        this.pageData.totalPage = res.meta['last_page'];
         this.pageData.sections.push(res.data);
         this.$nextTick(() => {
           this.loading = false;
           this.scrollEvent()
         });
       }).catch(err => {
+        console.log("请求数据失败：" + err)
         this.$nextTick(() => {
           this.loading = false;
         });

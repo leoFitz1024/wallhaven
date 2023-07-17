@@ -1,7 +1,7 @@
 {
-  "name": "wallhaven",
+  "name": "Wallhaven",
   "private": true,
-  "version": "4.0.0",
+  "version": "3.1.0",
   "main": "electron/main.js",
   "scripts": {
     "web dev": "vite",
@@ -10,23 +10,23 @@
     "electron:dev": "chcp 65001 && vite build & electron .",
     "electron:serve": "chcp 65001 && electron . ",
     "electron:build": "vite build && electron-builder --win --x64",
-    "release": "vite build && electron-builder --win -p always"
+    "release": "vite build && electron-builder --win --x64 -p always"
   },
   "build": {
     "appId": "www.wallhaven.cc",
     "productName": "Wallhaven",
     "copyright": "Copyright © 2021 <Chen>",
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://tmqt-sh-1257108036.cos-website.ap-shanghai.myqcloud.com/wallhaven/"
+      }
+    ],
     "win": {
       "icon": "logo.ico",
+      "artifactName": "${productName}_Setup_${version}.${ext}",
       "target": [
-        "nsis",
-        "zip"
+        "nsis"
       ]
     },
     "nsis": {
@@ -42,15 +42,6 @@
       "output": "dist_electron"
     }
   },
-  "publish": [
-    {
-      "provider": "github",
-      "owner": "leoFitz1024",
-      "repo": "wallhaven",
-      "private": false,
-      "releaseType": "release"
-    }
-  ],
   "dependencies": {
     "@electron/remote": "^2.0.8",
     "axios": "^0.26.1",
@@ -62,13 +53,16 @@
     "iconv-lite": "^0.6.3",
     "image-size": "^1.0.1",
     "node-gyp": "^9.0.0",
+    "vite-plugin-require-transform": "^1.0.20",
     "vue": "^3.2.25",
-    "vue-router": "^4.0.14"
+    "vue-router": "^4.0.14",
+    "win32-api": "^20.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.2.0",
-    "electron": "^17.1.2",
+    "electron": "^19.1.9",
     "electron-builder": "^22.14.13",
-    "vite": "^2.8.0"
+    "vite": "^2.8.0",
+    "vite-plugin-commonjs": "^0.8.0"
   }
 }

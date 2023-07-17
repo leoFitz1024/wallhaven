@@ -1,0 +1,3 @@
+provider: generic
+url: https://tmqt-sh-1257108036.cos-website.ap-shanghai.myqcloud.com/wallhaven/
+updaterCacheDirName: wallhaven-updater

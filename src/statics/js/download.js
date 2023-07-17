@@ -1,12 +1,23 @@
-
+import DOWNLOAD_IPC from "../../../electron/common/downloadIPC"
 /**
  * 下载文件
  * @param {*} item
  */
 export const downloadFile = (item) => {
-    window.ipcRenderer.send('download-file', item)
+    window.ipcRenderer.send(DOWNLOAD_IPC.DOWNLOAD_FILE, item)
     return new Promise((resolve, reject) => {
-        window.ipcRenderer.once(`download-file-${item.url}`, (data) => resolve(data))
+        window.ipcRenderer.once(`${DOWNLOAD_IPC.DOWNLOAD_FILE}-${item.url}`, (data) => resolve(data))
+    })
+}
+
+/**
+ * 暂停下载
+ * @param {*} url
+ */
+export const pauseDownload = (url) => {
+    window.ipcRenderer.send(DOWNLOAD_IPC.DOWNLOAD_FILE_PAUSE, url)
+    return new Promise((resolve, reject) => {
+        window.ipcRenderer.once(`${DOWNLOAD_IPC.DOWNLOAD_FILE_PAUSE}-${url}`, (data) => resolve(data))
     })
 }
 
@@ -15,31 +26,8 @@ export const downloadFile = (item) => {
  * @param {*} updateData
  */
 export const updateDownloadState = (updateData) => {
-    window.ipcRenderer.on('update-download-state', function (data) {
+    window.ipcRenderer.on(DOWNLOAD_IPC.UPDATE_DOWNLOAD_STATE, function (data) {
         updateData(data)
-    })
-}
-
-/**
- * 取消下载
- * @param {*} url
- */
-export const cancelDownload = (url) => {
-    window.ipcRenderer.send('download-file-cancel', url)
-    return new Promise((resolve, reject) => {
-        window.ipcRenderer.once(`download-file-cancel-${url}`, (data) => resolve(data))
-    })
-}
-
-
-/**
- * 暂停下载
- * @param {*} url
- */
-export const pauseDownload = (url) => {
-    window.ipcRenderer.send('download-file-pause', url)
-    return new Promise((resolve, reject) => {
-        window.ipcRenderer.once(`download-file-pause-${url}`, (data) => resolve(data))
     })
 }
 
@@ -48,8 +36,20 @@ export const pauseDownload = (url) => {
  * @param {*} data
  */
 export const resumeDownload = (data) => {
-    window.ipcRenderer.send('resume-download', data)
+    window.ipcRenderer.send(DOWNLOAD_IPC.RESUME_DOWNLOAD, data)
     return new Promise((resolve, reject) => {
-        window.ipcRenderer.once(`download-file-resume-${data.url}`, (data) => resolve(data))
+        window.ipcRenderer.once(`${DOWNLOAD_IPC.RESUME_DOWNLOAD}-${data.url}`, (data) => resolve(data))
     })
 }
+
+/**
+ * 取消下载
+ * @param {*} url
+ */
+export const cancelDownload = (url) => {
+    window.ipcRenderer.send(DOWNLOAD_IPC.DOWNLOAD_CANCEL, url)
+    return new Promise((resolve, reject) => {
+        window.ipcRenderer.once(`${DOWNLOAD_IPC.DOWNLOAD_CANCEL}-${url}`, (data) => resolve(data))
+    })
+}
+
