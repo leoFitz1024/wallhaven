@@ -498,7 +498,6 @@ export default {
         resolutions: null,
         page: 1,
       };
-      console.log(this.customParams)
       this.getParams.q = this.customParams.keyword;
       this.getParams.ai_art_filter = this.customParams.aiArt ? 0 : 1;
       this.getParams.categories = this.formatCategory();

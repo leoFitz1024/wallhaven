@@ -303,7 +303,7 @@ export default {
           customClass: 'customer-message'
         })
         if (res.success) {
-          localStorage.setItem("apiKey", params['apiKey'])
+          localStorage.setItem("apiKey", this.apiKey)
           localStorage.setItem("scheduleTime", params['scheduleTime'])
           localStorage.setItem("customScheduleTime", params['customScheduleTime'])
           localStorage.setItem("downloadDir", params['downloadDir'])

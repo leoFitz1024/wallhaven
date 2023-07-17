@@ -1,5 +1,6 @@
 import axios from './axios';
 import API_IPC from "../../../electron/common/apiIPC"
+import {getLocalStorage} from "./utils";
 
 export default {
 
@@ -14,6 +15,10 @@ export default {
      * 查找
      */
     search(params){
+        let apiKey = getLocalStorage("apiKey", "", "String")
+        if (apiKey !== ""){
+            params = `${params}&apiKey=${apiKey}`
+        }
         return axios.get(`/search?${params}`, {})
     }
 }
