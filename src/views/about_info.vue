@@ -14,7 +14,7 @@
       </el-card>
       <el-card class="info-card custom-card qr-card">
         <h3>Good Job! 如果您觉得该软件不错，可以给作者一点小小的鼓励。</h3>
-        <div style="line-height: 40px">所有赞赏者将会永久展示在赞赏名单中，为了保证您的昵称出现在在致谢名单上，赞赏时请备注上您的昵称。</div>
+        <div style="line-height: 40px">所有赞赏者将会永久展示在致谢名单中，为了保证您的昵称出现在在致谢名单上，赞赏时请备注上您的昵称。</div>
         <div class="qr-code-content">
           <div class="qr-card-item">
             <img class="qrcode" src="../statics/img/afd.png" alt="">

@@ -1,6 +1,7 @@
-# 爱发电主页（喜欢这款软件，为作者加鸡腿吧
+## Good Job! 如果您觉得该软件不错，可以给作者一点小小的鼓励。
+所有赞赏者将会永久展示在赞赏名单中
 
-https://afdian.net/a/wallhaven
+[支持一下作者](https://afdian.net/a/wallhaven)
 
 # Wallhaven 桌面版
 [wallhaven.cc](https://wallhaven.cc) 是我很喜欢的一个壁纸网站，但是每次都需要把壁纸下载保存，然后再手动替换，感觉太麻烦了。
@@ -18,18 +19,18 @@ Electron + Vue
 - 生成的 exe 安装包位于项目根目录/dist_electron中
 
 ## 下载地址
-- Github：[Release-3.0.0](https://github.com/leoFitz1024/wallhaven/releases/download/v3.0/Wallhaven.Setup.3.0.1.exe)
+- Github：[Release-4.0.0](https://github.com/leoFitz1024/wallhaven/releases/tag/v4.0)
 - 阿里网盘：[点我下载](https://www.aliyundrive.com/s/FjLC3dS5P5M)
 
 ## 问题反馈
 - Github <a href="https://github.com/leoFitz1024/wallhaven/discussions" target="_blank">discussions 💬</a> or <a href="https://github.com/leoFitz1024/wallhaven/issues" target="_blank">issues 💭</a>
-- QQ群：908029055
+- QQ群：871232189
 
 
 ## 待添加功能
 
-- 设置代理功能
-- 搜索功能
+- 支持多屏设置
+- 支持mac
 
 ## License ##
 This work is licensed under the [GPL3.0 License](LICENSE).
