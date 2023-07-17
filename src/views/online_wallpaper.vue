@@ -4,213 +4,221 @@
     <pageHeader :title="title"></pageHeader>
     <form id="searchbar" class="expanded" @click="resetSelect">
       <div @click.stop="" id="search-keyword" class="framed searchbar-dropdown">
-        <input type="text" name="keyword" placeholder="搜索关键词（英文）"  v-model="customParams.keyword"/>
+        <input type="text" name="keyword" placeholder="搜索关键词（英文）" v-model="customParams.keyword"/>
       </div>
-        <div @click.stop="" id="search-category-checks" class="framed">
-          <input type="checkbox" v-model="customParams.category" name="general" value="general"
-                 id="search-general"/>
-          <label for="search-general">普通</label>
-          <input type="checkbox" v-model="customParams.category" name="anime" value="anime" id="search-anime"/>
-          <label for="search-anime">动漫</label>
-          <input type="checkbox" v-model="customParams.category" name="people" value="people"
-                 id="search-people"/>
-          <label for="search-people">人物</label>
-        </div>
-        <div @click.stop="" id="search-purity-checks" class="framed">
-          <input type="checkbox" v-model="customParams.purity" name="sfw" value="sfw" id="search-sfw"/>
-          <label class="purity sfw" for="search-sfw" title="正经图">SFW</label>
-          <input type="checkbox" v-model="customParams.purity" name="sketchy" value="sketchy"
-                 id="search-sketchy"/>
-          <label class="purity sketchy" for="search-sketchy" title="带点颜色">Sketchy</label>
-          <input v-show="apiKey !== ''" type="checkbox" v-model="customParams.purity" name="nsfw" value="nsfw"
-                 id="search-nsfw"/>
-          <label v-show="apiKey !== ''" class="purity nsfw" for="search-nsfw" title="开车图">NSFW</label>
-        </div>
-        <div @click.stop="" id="search-resolutions" class="framed searchbar-dropdown">
-          <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 1 ? 'extended' : 'collapsed'"
-             @click="changeSelector(1)">分辨率</a>
-          <div class="dropdown " :class=" customParams.selector === 1 ? 'extended' : 'collapsed'">
-            <div>
-              <div class="framed">
-                <input type="radio" v-model="customParams.respickerLimitation"
-                       name="searchbar-respicker-limitation" id="searchbar-respicker-atleast"
-                       value="atleast"/>
-                <label for="searchbar-respicker-atleast"> <i class="far fa-plus"></i> 至少 </label>
-                <input type="radio" v-model="customParams.respickerLimitation"
-                       name="searchbar-respicker-limitation" id="searchbar-respicker-exactly"
-                       value="exactly"/>
-                <label for="searchbar-respicker-exactly"><i class="far fa-dot-circle"></i> 精确的 </label>
-              </div>
-              <div class="respicker">
-                <p v-show="desktopInfo !== ''" class="respicker-native-info">
-                  你的屏幕分辨率：<strong><em>{{ this.$root.desktopInfo }}</em></strong>.</p>
-                <table class="label-table">
-                  <thead>
-                  <tr>
-                    <th>Ultrawide</th>
-                    <th>16:9</th>
-                    <th>16:10</th>
-                    <th>4:3</th>
-                    <th>5:4</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr v-for="(line, i) in searchMeta.resolutionsArray">
-                    <td v-for="(rln, x) in line.item">
-                      <input v-if="customParams.respickerLimitation !== 'atleast'" type="checkbox"
-                             name="respicker-resolution" :id="'searchbar-respicker-' + (rln)"
-                             :value="rln" v-model="customParams.resolutions"/>
-                      <input v-if="customParams.respickerLimitation === 'atleast'" type="radio"
-                             name="respicker-resolution" :id="'searchbar-respicker-' + (rln)"
-                             :value="rln" v-model="customParams.resolution"/>
-                      <label :for="'searchbar-respicker-' + (rln)"
-                             original-title="Dual 1080p">{{ this.$formatMulti(rln) }}</label>
-                    </td>
-                  </tr>
-                  </tbody>
-                </table>
-                <hr/>
-                <div class="respicker-custom oneline framed">
-                  <label for="searchbar-respicker-custom-width">自定义分辨率</label>
-                  <input type="text" pattern="[0-9]{0,5}" v-model="customParams.respickerCustomWidth"
-                         name="respicker-custom-width" id="searchbar-respicker-custom-width"
-                         placeholder="Width" maxlength="5"/>
-                  <label class="respicker-custom-separator"><i class="far fa-times"></i></label>
-                  <input type="text" pattern="[0-9]{0,5}" v-model="customParams.respickerCustomHeight"
-                         name="respicker-custom-height" id="searchbar-respicker-custom-height"
-                         placeholder="Height" maxlength="5"/>
-                </div>
-              </div>
+      <div @click.stop="" id="search-category-checks" class="framed">
+        <input type="checkbox" v-model="customParams.categories" name="general" value="general"
+               id="search-general"/>
+        <label for="search-general">普通</label>
+        <input type="checkbox" v-model="customParams.categories" name="anime" value="anime" id="search-anime"/>
+        <label for="search-anime">动漫</label>
+        <input type="checkbox" v-model="customParams.categories" name="people" value="people"
+               id="search-people"/>
+        <label for="search-people">人物</label>
+      </div>
+      <div @click.stop="" id="search-aiart-checks" class="framed">
+        <input type="checkbox" v-model="customParams.aiArt" value=true name="ai_art_filter"
+               id="search-ai">
+        <label for="search-ai">AI画作</label>
+      </div>
+      <div @click.stop="" id="search-purity-checks" class="framed">
+        <input type="checkbox" v-model="customParams.purity" name="sfw" value="sfw" id="search-sfw"/>
+        <label class="purity sfw" for="search-sfw" title="正经图">SFW</label>
+        <input type="checkbox" v-model="customParams.purity" name="sketchy" value="sketchy"
+               id="search-sketchy"/>
+        <label class="purity sketchy" for="search-sketchy" title="带点颜色">Sketchy</label>
+        <input v-show="apiKey !== ''" type="checkbox" v-model="customParams.purity" name="nsfw" value="nsfw"
+               id="search-nsfw"/>
+        <label v-show="apiKey !== ''" class="purity nsfw" for="search-nsfw" title="开车图">NSFW</label>
+      </div>
+      <div @click.stop="" id="search-resolutions" class="framed searchbar-dropdown">
+        <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 1 ? 'extended' : 'collapsed'"
+           @click="changeSelector(1)">分辨率</a>
+        <div class="dropdown " :class=" customParams.selector === 1 ? 'extended' : 'collapsed'">
+          <div>
+            <div class="framed">
+              <input type="radio" v-model="customParams.respickerLimitation"
+                     name="searchbar-respicker-limitation" id="searchbar-respicker-atleast"
+                     value="atleast"/>
+              <label for="searchbar-respicker-atleast"> <i class="far fa-plus"></i> 至少 </label>
+              <input type="radio" v-model="customParams.respickerLimitation"
+                     name="searchbar-respicker-limitation" id="searchbar-respicker-exactly"
+                     value="exactly"/>
+              <label for="searchbar-respicker-exactly"><i class="far fa-dot-circle"></i> 精确的 </label>
             </div>
-          </div>
-        </div>
-        <div @click.stop="" id="search-ratios" class="framed searchbar-dropdown">
-          <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 2 ? 'extended' : 'collapsed'"
-             @click="changeSelector(2)" style="min-width: 5em">比例</a>
-          <div class="dropdown" :class=" customParams.selector === 2 ? 'extended' : 'collapsed'">
-            <div style="padding: .5em 1em;">
-              <div class="respicker">
-                <table class="label-table">
-                  <thead>
-                  <tr>
-                    <th>宽屏</th>
-                    <th>超宽屏</th>
-                    <th>竖屏</th>
-                    <th>方屏</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                    <td colspan="2">
-                      <input type="checkbox" name="ratio" v-model="customParams.ratios" value="landscape" class="ratio"
-                             id="searchbar-ratio-landscape"/>
-                      <label for="searchbar-ratio-landscape"> 全部横屏 </label>
-                    </td>
-                    <td><input type="checkbox" name="ratio" v-model="customParams.ratios" value="portrait" class="ratio"
-                               id="searchbar-ratio-portrait"/><label for="searchbar-ratio-portrait">全部竖屏</label></td>
-                  </tr>
-                  <tr v-for="(line,i) in searchMeta.ratiosArray">
-                    <td v-for="(ra,x) in line.item">
-                      <input v-if="ra !== ''" v-model="customParams.ratios" type="checkbox"
-                             name="ratio" :value="ra" class="ratio"
-                             :id="'searchbar-ratio-' + (ra)"/>
-                      <label :for="'searchbar-ratio-' + (ra)">{{ this.$formatMulti(ra) }}</label>
-                    </td>
-                  </tr>
-                  </tbody>
-                </table>
+            <div class="respicker">
+              <p v-show="desktopInfo !== ''" class="respicker-native-info">
+                你的屏幕分辨率：<strong><em>{{ this.$root.desktopInfo }}</em></strong>.</p>
+              <table class="label-table">
+                <thead>
+                <tr>
+                  <th>Ultrawide</th>
+                  <th>16:9</th>
+                  <th>16:10</th>
+                  <th>4:3</th>
+                  <th>5:4</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(line, i) in searchMeta.resolutionsArray">
+                  <td v-for="(rln, x) in line.item">
+                    <input v-if="customParams.respickerLimitation !== 'atleast'" type="checkbox"
+                           name="respicker-resolution" :id="'searchbar-respicker-' + (rln)"
+                           :value="rln" v-model="customParams.resolutions"/>
+                    <input v-if="customParams.respickerLimitation === 'atleast'" type="radio"
+                           name="respicker-resolution" :id="'searchbar-respicker-' + (rln)"
+                           :value="rln" v-model="customParams.resolution"/>
+                    <label :for="'searchbar-respicker-' + (rln)"
+                           original-title="Dual 1080p">{{ this.$formatMulti(rln) }}</label>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+              <hr/>
+              <div class="respicker-custom oneline framed">
+                <label for="searchbar-respicker-custom-width">自定义分辨率</label>
+                <input type="text" pattern="[0-9]{0,5}" v-model="customParams.respickerCustomWidth"
+                       name="respicker-custom-width" id="searchbar-respicker-custom-width"
+                       placeholder="Width" maxlength="5"/>
+                <label class="respicker-custom-separator"><i class="far fa-times"></i></label>
+                <input type="text" pattern="[0-9]{0,5}" v-model="customParams.respickerCustomHeight"
+                       name="respicker-custom-height" id="searchbar-respicker-custom-height"
+                       placeholder="Height" maxlength="5"/>
               </div>
             </div>
           </div>
         </div>
-        <div @click.stop="" id="search-colors" class="framed searchbar-dropdown">
-          <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 3 ? 'extended' : 'collapsed'"
-             @click="changeSelector(3)" style="border-radius: 3px;"
-             :style="customParams.color !== 'none' ? 'background-color: #' + (customParams.color) + ';' : ''">颜色</a>
-          <div class="dropdown" :class=" customParams.selector === 3 ? 'extended' : 'collapsed'">
-            <div style="padding: .5em 1em;">
-              <div class="colorpicker">
-                <table class="label-table">
-                  <tbody>
-                  <tr v-for="(line, i) in searchMeta.colorsArray">
-                    <td v-for="(colorItem, i) in line.item">
-                      <input type="radio" v-model="customParams.color" name="search-colors"
-                             :id="'search-colors-' + (colorItem)" :value="colorItem"/>
-                      <label :for="'search-colors-' + (colorItem)"
-                             :style="colorItem === 'none' ? 'height: 2em;background:linear-gradient(18deg, rgba(255,255,255,1) 42%,rgba(255,0,0,1) 45%,rgba(255,0,0,1) 55%,rgba(255,255,255,1) 58%);' : 'background: #' + (colorItem)+'; height: 2em;'">
-                      </label>
-                    </td>
-                  </tr>
-                  </tbody>
-                </table>
-              </div>
+      </div>
+      <div @click.stop="" id="search-ratios" class="framed searchbar-dropdown">
+        <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 2 ? 'extended' : 'collapsed'"
+           @click="changeSelector(2)" style="min-width: 5em">比例</a>
+        <div class="dropdown" :class=" customParams.selector === 2 ? 'extended' : 'collapsed'">
+          <div style="padding: .5em 1em;">
+            <div class="respicker">
+              <table class="label-table">
+                <thead>
+                <tr>
+                  <th>宽屏</th>
+                  <th>超宽屏</th>
+                  <th>竖屏</th>
+                  <th>方屏</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td colspan="2">
+                    <input type="checkbox" name="ratio" v-model="customParams.ratios" value="landscape" class="ratio"
+                           id="searchbar-ratio-landscape"/>
+                    <label for="searchbar-ratio-landscape"> 全部横屏 </label>
+                  </td>
+                  <td><input type="checkbox" name="ratio" v-model="customParams.ratios" value="portrait" class="ratio"
+                             id="searchbar-ratio-portrait"/><label for="searchbar-ratio-portrait">全部竖屏</label></td>
+                </tr>
+                <tr v-for="(line,i) in searchMeta.ratiosArray">
+                  <td v-for="(ra,x) in line.item">
+                    <input v-if="ra !== ''" v-model="customParams.ratios" type="checkbox"
+                           name="ratio" :value="ra" class="ratio"
+                           :id="'searchbar-ratio-' + (ra)"/>
+                    <label :for="'searchbar-ratio-' + (ra)">{{ this.$formatMulti(ra) }}</label>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <div @click.stop="" id="search-sorting" class="framed searchbar-dropdown">
-          <input type="checkbox" name="order" v-model="customParams.desc" value="desc" id="search-order"/>
-          <label for="search-order" original-title="Ascending/Descending"></label>
-          <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 4 ? 'extended' : 'collapsed'"
-             @click="changeSelector(4)" style="width: 7em">{{ sortingFormat(customParams.sorting) }}</a>
-          <div class="dropdown" :class=" customParams.selector === 4 ? 'extended' : 'collapsed'">
-            <div>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="relevance"
-                     id="search-sorting-relevance"/>
-              <label for="search-sorting-relevance">相关性</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="random"
-                     id="search-sorting-random"/>
-              <label for="search-sorting-random">随机</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="date_added"
-                     id="search-sorting-date"/>
-              <label for="search-sorting-date">日期</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="views"
-                     id="search-sorting-views"/>
-              <label for="search-sorting-views">浏览量</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="favorites"
-                     id="search-sorting-favorites"/>
-              <label for="search-sorting-favorites">收藏数</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="toplist"
-                     id="search-sorting-toplist">
-              <label for="search-sorting-toplist">排行榜</label>
-              <input type="radio" v-model="customParams.sorting" name="sorting" value="hot"
-                     id="search-sorting-hot"/>
-              <label for="search-sorting-hot">热度</label>
+      </div>
+      <div @click.stop="" id="search-colors" class="framed searchbar-dropdown">
+        <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 3 ? 'extended' : 'collapsed'"
+           @click="changeSelector(3)" style="border-radius: 3px;"
+           :style="customParams.color !== 'none' ? 'background-color: #' + (customParams.color) + ';' : ''">颜色</a>
+        <div class="dropdown" :class=" customParams.selector === 3 ? 'extended' : 'collapsed'">
+          <div style="padding: .5em 1em;">
+            <div class="colorpicker">
+              <table class="label-table">
+                <tbody>
+                <tr v-for="(line, i) in searchMeta.colorsArray">
+                  <td v-for="(colorItem, i) in line.item">
+                    <input type="radio" v-model="customParams.color" name="search-colors"
+                           :id="'search-colors-' + (colorItem)" :value="colorItem"/>
+                    <label :for="'search-colors-' + (colorItem)"
+                           :style="colorItem === 'none' ? 'height: 2em;background:linear-gradient(18deg, rgba(255,255,255,1) 42%,rgba(255,0,0,1) 45%,rgba(255,0,0,1) 55%,rgba(255,255,255,1) 58%);' : 'background: #' + (colorItem)+'; height: 2em;'">
+                    </label>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-        <div @click.stop="" :style="customParams.sorting !== 'toplist' ? 'visibility:hidden' : ''" id="search-toplist-range"
-             class="framed searchbar-dropdown">
-          <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 5 ? 'extended' : 'collapsed'"
-             @click="changeSelector(5)" style="width: 8.5em;">{{ topRangeFormat(customParams.topRange) }}</a>
-          <div class="dropdown" :class=" customParams.selector === 5 ? 'extended' : 'collapsed'">
-            <div>
-              <input type="radio" v-model="customParams.topRange" name="top" value="1d"
-                     id="searchbar-toplist-range-1d"/>
-              <label for="searchbar-toplist-range-1d">1 天</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="3d"
-                     id="searchbar-toplist-range-3d"/>
-              <label for="searchbar-toplist-range-3d">3 天</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="1w"
-                     id="searchbar-toplist-range-1w"/>
-              <label for="searchbar-toplist-range-1w">上周</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="1M"
-                     id="searchbar-toplist-range-1M" checked=""/>
-              <label for="searchbar-toplist-range-1M">1 个月</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="3M"
-                     id="searchbar-toplist-range-3M"/>
-              <label for="searchbar-toplist-range-3M">3 个月</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="6M"
-                     id="searchbar-toplist-range-6M"/>
-              <label for="searchbar-toplist-range-6M">6 个月</label>
-              <input type="radio" v-model="customParams.topRange" name="top" value="1y"
-                     id="searchbar-toplist-range-1y"/>
-              <label for="searchbar-toplist-range-1y">去年</label>
-            </div>
+      </div>
+      <div @click.stop="" id="search-sorting" class="framed searchbar-dropdown">
+        <input type="checkbox" name="order" v-model="customParams.desc" value="desc" id="search-order"/>
+        <label for="search-order" original-title="Ascending/Descending"></label>
+        <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 4 ? 'extended' : 'collapsed'"
+           @click="changeSelector(4)" style="width: 7em">{{ sortingFormat(customParams.sorting) }}</a>
+        <div class="dropdown" :class=" customParams.selector === 4 ? 'extended' : 'collapsed'">
+          <div>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="relevance"
+                   id="search-sorting-relevance"/>
+            <label for="search-sorting-relevance">相关性</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="random"
+                   id="search-sorting-random"/>
+            <label for="search-sorting-random">随机</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="date_added"
+                   id="search-sorting-date"/>
+            <label for="search-sorting-date">日期</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="views"
+                   id="search-sorting-views"/>
+            <label for="search-sorting-views">浏览量</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="favorites"
+                   id="search-sorting-favorites"/>
+            <label for="search-sorting-favorites">收藏数</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="toplist"
+                   id="search-sorting-toplist">
+            <label for="search-sorting-toplist">排行榜</label>
+            <input type="radio" v-model="customParams.sorting" name="sorting" value="hot"
+                   id="search-sorting-hot"/>
+            <label for="search-sorting-hot">热度</label>
           </div>
         </div>
+      </div>
+      <div @click.stop="" :style="customParams.sorting !== 'toplist' ? 'visibility:hidden' : ''"
+           id="search-toplist-range"
+           class="framed searchbar-dropdown">
+        <a class="jsAnchor dropdown-toggle" :class=" customParams.selector === 5 ? 'extended' : 'collapsed'"
+           @click="changeSelector(5)" style="width: 8.5em;">{{ topRangeFormat(customParams.topRange) }}</a>
+        <div class="dropdown" :class=" customParams.selector === 5 ? 'extended' : 'collapsed'">
+          <div>
+            <input type="radio" v-model="customParams.topRange" name="top" value="1d"
+                   id="searchbar-toplist-range-1d"/>
+            <label for="searchbar-toplist-range-1d">1 天</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="3d"
+                   id="searchbar-toplist-range-3d"/>
+            <label for="searchbar-toplist-range-3d">3 天</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="1w"
+                   id="searchbar-toplist-range-1w"/>
+            <label for="searchbar-toplist-range-1w">上周</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="1M"
+                   id="searchbar-toplist-range-1M" checked=""/>
+            <label for="searchbar-toplist-range-1M">1 个月</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="3M"
+                   id="searchbar-toplist-range-3M"/>
+            <label for="searchbar-toplist-range-3M">3 个月</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="6M"
+                   id="searchbar-toplist-range-6M"/>
+            <label for="searchbar-toplist-range-6M">6 个月</label>
+            <input type="radio" v-model="customParams.topRange" name="top" value="1y"
+                   id="searchbar-toplist-range-1y"/>
+            <label for="searchbar-toplist-range-1y">去年</label>
+          </div>
+        </div>
+      </div>
       <button type="button" class="button" id="search-submit" @click="changeParams"><i class="fas fa-sync"></i></button>
       <el-tooltip content="设置为在线切换模式参数" placement="bottom" effect="light" popper-class="custom-tips">
-        <button type="button" class="button" id="search-save" @click="saveParams"><i class="fas" :class=" saving ? 'fa-spinner' : 'fa-save'"></i></button>
+        <button type="button" class="button" id="search-save" @click="saveParams"><i class="fas"
+                                                                                     :class=" saving ? 'fa-spinner' : 'fa-save'"></i>
+        </button>
       </el-tooltip>
     </form>
     <main id="main" @click="resetSelect">
@@ -224,7 +232,6 @@
           </header>
           <ul>
             <li v-for="(liItem, index) in sectionItem">
-<!--              <figure class="thumb" v-if="customParams.category.indexOf(liItem.category) > -1"-->
               <figure class="thumb"
                       :class="'thumb-' + (liItem.id) + ' thumb-' + (liItem.purity) + ' thumb-' + (liItem.category)"
                       :data-wallpaper-id="liItem.id" style="width:300px;height:200px">
@@ -269,7 +276,7 @@ export default {
   name: "onlineWall",
   data() {
     return {
-      saving:false,
+      saving: false,
       title: "在线壁纸",
       isCurrent: false,
       showImgPre: false,
@@ -279,7 +286,8 @@ export default {
       apiKey: "",
       getParams: {
         q: "",
-        category: 111,
+        ai_art_filter: 0,
+        categories: 111,
         purity: 100,
         sorting: "hot",
         topRange: "1M",
@@ -293,7 +301,8 @@ export default {
       customParams: {
         selector: 0,
         keyword: "",
-        category: ["general", "anime", "people"],
+        categories: ["general", "anime", "people"],
+        aiArt: false,
         purity: ["sfw"],
         sorting: "hot",
         desc: true,
@@ -362,11 +371,11 @@ export default {
   },
   props: ['desktopInfo'],
   watch: {
-    'customParams.category': {
+    'customParams.categories': {
       handler: function () {
-        if(this.customParams.category.length === 0){
-          this.customParams.category.push("general")
-          this.customParams.category.push("anime")
+        if (this.customParams.categories.length === 0) {
+          this.customParams.categories.push("general")
+          this.customParams.categories.push("anime")
         }
         this.scrollEvent()
       }
@@ -375,14 +384,7 @@ export default {
   created: function () {
     this.isCurrent = true
     let customParamsJson = getLocalStorage("customParams", "{}", "String")
-    if (customParamsJson === "{}") {
-      localStorage.setItem("customParams", JSON.stringify(this.customParams))
-    } else {
-      this.customParams = JSON.parse(customParamsJson)
-      if(!this.customParams.keyword){
-        this.customParams.keyword = "";
-      }
-    }
+    this.initParams(JSON.parse(customParamsJson))
     this.loading = true
     this.formatGetParams()
     this.getNextPage()
@@ -455,8 +457,8 @@ export default {
       this.pageData.sections.length = 0;
       this.pageData.currentPage = 0;
       this.customParams.selector = 0;
-      if (this.customParams.category.length === 0) {
-        this.customParams.category = ["general", "anime"];
+      if (this.customParams.categories.length === 0) {
+        this.customParams.categories = ["general", "anime"];
       }
       if (this.customParams.purity.length === 0) {
         this.customParams.purity = ["sfw"]
@@ -477,14 +479,15 @@ export default {
           duration: res.type === "success" ? 1200 : 2000,
           customClass: 'customer-message'
         })
-      }).finally(()=>{
+      }).finally(() => {
         this.saving = false
       })
     },
     formatGetParams() {
       this.getParams = {
         q: "",
-        category: 111,
+        ai_art_filter: 0,
+        categories: 111,
         purity: 100,
         sorting: "hot",
         topRange: "1M",
@@ -495,8 +498,10 @@ export default {
         resolutions: null,
         page: 1,
       };
+      console.log(this.customParams)
       this.getParams.q = this.customParams.keyword;
-      this.getParams.category = this.formatCategory();
+      this.getParams.ai_art_filter = this.customParams.aiArt ? 0 : 1;
+      this.getParams.categories = this.formatCategory();
       this.getParams.purity = this.formatPurity();
       this.getParams.sorting = this.customParams.sorting;
       this.getParams.topRange = this.customParams.topRange;
@@ -558,6 +563,13 @@ export default {
         return encodeURIComponent(key) + "=" + encodeURIComponent(getParams[key])
       }).join("&");
     },
+    //初始化参数，去除失效的参数，增加初始化新增的参数
+    initParams(oldCustomParams) {
+      let that = this;
+      Object.keys(this.customParams).forEach(function (key) {
+        that.customParams[key] = oldCustomParams[key] == null ? that.customParams[key] : oldCustomParams[key]
+      })
+    },
     scrollEvent() {
       this.$nextTick(() => {
         if (document.body.scrollHeight - document.documentElement.scrollTop - document.body.clientHeight <= 200 &&
@@ -569,7 +581,7 @@ export default {
     },
     formatCategory() {
       return ALL_CATEGORIES.map(cat => {
-        return String(Number(this.customParams.category.indexOf(cat) > -1))
+        return String(Number(this.customParams.categories.indexOf(cat) > -1))
       }).join('')
     },
     formatPurity() {
