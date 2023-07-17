@@ -76,7 +76,7 @@ export default {
       acknowledgementList: [],
       versions: [
         {
-          "version": "3.1.0",
+          "version": "4.0.0",
           "releaseTime": "2023-07-17",
           "notes": [
             "代理功能支持http协议/socks协议",
