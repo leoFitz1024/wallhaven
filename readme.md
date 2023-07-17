@@ -31,6 +31,7 @@ Electron + Vue
 
 - 支持多屏设置
 - 支持mac
+- 支持收藏列表
 
 ## License ##
 This work is licensed under the [GPL3.0 License](LICENSE).
