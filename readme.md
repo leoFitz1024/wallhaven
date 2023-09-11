@@ -29,7 +29,7 @@
 
 ## 快速上手 🤗
 #### 直接使用打包好的程序
-- [阿里网盘](https://www.aliyundrive.com/s/FjLC3dS5P5M)
+- [阿里网盘](https://www.aliyundrive.com/s/Jy3dWEDUcyi)
 - [Release](https://github.com/leoFitz1024/wallhaven/releases/latest)
 
 #### 通过本地构建
