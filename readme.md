@@ -1,40 +1,118 @@
+<h1 align='center'>
+  Wallhaven
+</h1>
+
+<p align='center'>
+  基于<a href="https://wallhaven.cc">wallhaven.cc</a>的一款壁纸管理工具
+</p>
+
+<p align='center'>
+  <a href="https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/LICENSE">
+    <img src="https://img.shields.io/github/license/leoFitz1024/wallhaven?style=flat&label=License">
+  </a>
+  <a href="https://github.com/leoFitz1024/wallhaven/forks">
+    <img src="https://img.shields.io/github/forks/leoFitz1024/wallhaven?style=flat&label=Forks">
+  </a>
+  <a href="https://github.com/leoFitz1024/wallhaven/stargazers">
+    <img src="https://img.shields.io/github/stars/leoFitz1024/wallhaven?style=flat&label=Stars">
+  </a>
+  <a href="https://github.com/leoFitz1024/wallhaven/releases">
+    <img src="https://img.shields.io/github/downloads/leoFitz1024/wallhaven/total?style=flat&label=Downloads">
+  </a>
+</p>
+
+<p align='center'>
+  <img width="120px" src="https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/logo.png">
+</p>
+
+
+
+## 快速上手 🤗
+#### 直接使用打包好的程序
+- [阿里网盘](https://www.aliyundrive.com/s/FjLC3dS5P5M)
+- [Release](https://github.com/leoFitz1024/wallhaven/releases/latest)
+
+#### 通过本地构建
+##### 环境：
+  - nodejs
+  - npm 
+
+下载项目 `zip` 压缩包解压至文件夹或通过 `git`
+```shell
+cd wallhaven
+git clone https://github.com/leoFitz1024/wallhaven.git
+```
+安装依赖
+```shell
+npm install
+```
+运行 具体参考以下
+```shell
+    "web dev": "vite",
+    "web build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "chcp 65001 && vite build & electron .",
+    "electron:serve": "chcp 65001 && electron . ",
+    "electron:build": "vite build && electron-builder --win --x64",
+    "release": "vite build && electron-builder --win --x64 -p always"
+```
+
+## 功能一览 （持续更新中）🥰
+- 已实现功能
+  - 预览壁纸 ✅
+  - 本地壁纸列表 ✅
+  - 一键切换壁纸 ✅
+  - 指定屏幕切换壁纸 ✅
+  - 一键下载壁纸 ✅
+  - 在线/本地 定时切换壁纸（顺序、随机）✅
+  - 下载任务管理 ✅
+
+- 未实现功能
+  - 支持MAC ❎
+  - 支持在线收藏夹功能 ❎
+ 
+
 ## Good Job! 如果您觉得该软件不错，可以给作者一点小小的鼓励。
 所有赞赏者将会永久展示在赞赏名单中
 
-[支持一下作者](https://afdian.net/a/wallhaven)
+<p align='center'>
+  <img width="180px" src="https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/wxzs.jpg">
+</p>
 
-# Wallhaven 桌面版
-[wallhaven.cc](https://wallhaven.cc) 是我很喜欢的一个壁纸网站，但是每次都需要把壁纸下载保存，然后再手动替换，感觉太麻烦了。
+<p align='center'>
+  <a href="https://afdian.net/a/wallhaven">爱发电支持一下作者</a>
+</p>
 
-所以动手写了该软件，可以直接浏览网站的壁纸，然后一键设置成壁纸。附加功能是可以定时切换壁纸。
+## 帮助我们改进 Wallhaven 😘
+  
+个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/leoFitz1024/wallhaven/issues)。发布 issue 时请务必带上**版本信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
 
-## 项目框架
-Electron + Vue
+如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！PR 也大欢迎！
 
-## 如何编译
-- NodeJs 环境
-- npm install 安装依赖（Electron 的开发环境需要安装 vs2019，安装时勾选 c++ 桌面开发组件）
-- 执行 electron:dev 本地运行
-- 执行 electron:build 打包exe
-- 生成的 exe 安装包位于项目根目录/dist_electron中
+发布新 issue 前先请看看之前是否讨论过相关或类似的问题哦~ 
 
-## 下载地址
-- Github：[Release-4.0.0](https://github.com/leoFitz1024/wallhaven/releases/tag/v4.0)
-- 阿里网盘：[点我下载](https://www.aliyundrive.com/s/FjLC3dS5P5M)
+- Github [issue](https://github.com/leoFitz1024/wallhaven/issues)
 
-## 问题反馈
-- Github <a href="https://github.com/leoFitz1024/wallhaven/discussions" target="_blank">discussions 💬</a> or <a href="https://github.com/leoFitz1024/wallhaven/issues" target="_blank">issues 💭</a>
 - QQ群：871232189
 
+## 点个 Star 支持作者 ⭐
+<!-- ![](https://api.star-history.com/svg?repos=leoFitz1024/wallhaven&type=Date) -->
+<p align='center'>
+  <img src="https://api.star-history.com/svg?repos=leoFitz1024/wallhaven&type=Date">
+</p>
 
-## 待添加功能
+## 免责声明
+本软件为开源软件，所有图片资源均来源于www.wallhaven.cc，如有侵权图片，请直接联系网站管理员
 
-- 支持多屏设置
-- 支持mac
-- 支持收藏列表
+## 鸣谢列表
+  【<strong>ID YOUNG</strong>】
+  【<strong>佚名</strong>】
+  【<strong>爱发电用户_RasX</strong>】
+  【<strong>wjk3719</strong>】
+  【<strong>arijoes</strong>】
 
-## License ##
-This work is licensed under the [GPL3.0 License](LICENSE).
+## 许可证 ⚖️
+wallhaven 使用 [GPLv3](https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/LICENSE) 许可证，代码不经允许**不可商用**。宣传或转载时请带上[本页链接](https://github.com/leoFitz1024/wallhaven)。
 
 ## 🔋 JetBrains 开源证书支持
 
@@ -43,5 +121,3 @@ This work is licensed under the [GPL3.0 License](LICENSE).
 <a href="https://www.jetbrains.com/?from=Wallhaven" target="_blank">
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png?_gl=1*uuea04*_ga*NjI1NDY3NTA5LjE2NDY4MTYyNzU.*_ga_9J976DJZ68*MTY1MzYzNDU0Ni4zLjEuMTY1MzYzNDgwNC42MA..&_ga=2.233490974.1041456340.1653552668-625467509.1646816275" width="250" align="middle"/>
 </a>  
-
-
