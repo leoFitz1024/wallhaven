@@ -110,6 +110,7 @@ npm install
   【<strong>爱发电用户_RasX</strong>】
   【<strong>wjk3719</strong>】
   【<strong>arijoes</strong>】
+  【<strong>挚爱丶孤城</strong>】
 
 ## 许可证 ⚖️
 wallhaven 使用 [GPLv3](https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/LICENSE) 许可证，代码不经允许**不可商用**。宣传或转载时请带上[本页链接](https://github.com/leoFitz1024/wallhaven)。
