@@ -25,7 +25,9 @@
   <img width="120px" src="https://github.com/leoFitz1024/wallhaven/blob/master-4.0.0/logo.png">
 </p>
 
-
+## ！！通知！！
+### wallhaven.cc网站已经完全被墙了，请大家更新4.2.0版本使用
+### 如果大家自己有梯子的，请结合梯子使用，作者自己的服务器顶不住太多流量
 
 ## 快速上手 🤗
 #### 直接使用打包好的程序
