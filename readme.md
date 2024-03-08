@@ -26,7 +26,7 @@
 </p>
 
 ## ！！通知！！
-### wallhaven.cc网站已经完全被墙了，请大家更新4.4.1版本使用
+### wallhaven.cc网站已经完全被墙了，请大家更新4.4.2版本使用
 ### 如果大家自己有梯子的，请结合梯子使用，作者自己的服务器顶不住太多流量
 
 ## 快速上手 🤗
@@ -58,6 +58,23 @@ npm install
     "electron:build": "vite build && electron-builder --win --x64",
     "release": "vite build && electron-builder --win --x64 -p always"
 ```
+## 页面预览 （持续更新中）🥰
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/edbe0f62-72e7-410b-8b0a-c4712a2a97be)
+
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/409f63f9-1d31-4ad2-bf07-d00edf651cde)
+
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/9ca6d4a6-53ce-480a-b1e5-af250b20372f)
+
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/f2fbea33-db27-425c-852f-07a66438f1bc)
+
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/2e13acbb-adcf-41bb-ae0e-d783c6bad30e)
+
+![image](https://github.com/leoFitz1024/wallhaven/assets/29174699/40ceb5c3-b4a5-4d33-8fc3-a019059a8ac6)
+
+
+
+
+
 
 ## 功能一览 （持续更新中）🥰
 - 已实现功能
@@ -68,9 +85,9 @@ npm install
   - 一键下载壁纸 ✅
   - 在线/本地 定时切换壁纸（顺序、随机）✅
   - 下载任务管理 ✅
+  - 支持MAC ✅
 
 - 未实现功能
-  - 支持MAC ❎
   - 支持在线收藏夹功能 ❎
  
 
@@ -87,7 +104,7 @@ npm install
 
 ## 帮助我们改进 Wallhaven 😘
   
-个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/leoFitz1024/wallhaven/issues)。发布 issue 时请务必带上**版本信息**，最好能提供问题的**复现过程**；若程序报错请带上**错误信息**。
+个人开发能力有限，在您的使用过程中，如果遇到程序的任何 BUG 或不符合预期的行为，欢迎提出 [issue](https://github.com/leoFitz1024/wallhaven/issues)。发布 issue 时请务必带上**版本信息**，问题的**复现过程**；若程序报错请带上**错误信息**。
 
 如果您有功能上的添加或修改建议，也非常欢迎提出 issue 进行讨论！PR 也大欢迎！
 
@@ -95,7 +112,7 @@ npm install
 
 - Github [issue](https://github.com/leoFitz1024/wallhaven/issues)
 
-- QQ群：871232189
+- QQ群：498982397
 
 ## 点个 Star 支持作者 ⭐
 <!-- ![](https://api.star-history.com/svg?repos=leoFitz1024/wallhaven&type=Date) -->
